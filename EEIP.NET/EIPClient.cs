@@ -484,7 +484,7 @@ namespace Sres.Net.EEIP
             uint sinAddress;
             if (O_T_ConnectionType == ConnectionType.Multicast)
             {
-                sinAddress = GetMulticastAddress(BitConverter.ToUInt32(this.targetIpAddress.GetAddressBytes(), 0));
+                sinAddress = GetMulticastAddress(this.targetIpAddress);
                 multicastAddress = sinAddress;
             }
             else
@@ -584,6 +584,7 @@ namespace Sres.Net.EEIP
         }
 
         private ushort t_o_detectedLength;
+
         /// <summary>
         /// Detects the Length of the data Target -> Originator.
         /// The Method uses an Explicit Message to detect the length.
@@ -601,9 +602,17 @@ namespace Sres.Net.EEIP
             return t_o_detectedLength;
         }
 
-        /// <param name="deviceIPAddress">Value of IP address. The value is in big-endian format</param>
-        private static uint GetMulticastAddress(uint deviceIPAddress)
+        /// <returns>Value of IP the multicast address. The value is in big-endian format</returns>
+        private static uint GetMulticastAddress(IPAddress ipAddress)
         {
+            // native order
+            var addressBytes = ipAddress.GetAddressBytes();
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(addressBytes);
+            }
+            uint deviceIPAddress = BitConverter.ToUInt32(addressBytes, 0);
+
             var cip_Mcast_Base_Addr = 0xEFC00100;
             uint cip_Host_Mask = 0x3FF;
             uint netmask = 0;
@@ -622,8 +631,19 @@ namespace Sres.Net.EEIP
             var mcastIndex = hostID - 1;
             mcastIndex = mcastIndex & cip_Host_Mask;
 
-            return cip_Mcast_Base_Addr + mcastIndex * 32;
+            var mcastAddr = cip_Mcast_Base_Addr + mcastIndex * 32;
+            return BitConverter.IsLittleEndian ? SwapEndianness(mcastAddr) : mcastAddr;
         }
+        
+        private static uint SwapEndianness(uint value)
+        {
+            var b1 = value & 0xff;
+            var b2 = (value >> 8) & 0xff;
+            var b3 = (value >> 16) & 0xff;
+            var b4 = (value >> 24) & 0xff;
+
+            return b1 << 24 | b2 << 16 | b3 << 8 | b4;
+        } 
 
         public void ForwardClose()
         {
