@@ -16,8 +16,7 @@ namespace ConsoleApplication1
 
 
             EEIPClient eeipClient = new EEIPClient();
-            eeipClient.IPAddress = "192.168.0.123";
-            eeipClient.RegisterSession();
+            eeipClient.RegisterSession(new Uri("tcp://192.168.0.123"));
             byte[] response = eeipClient.GetAttributeSingle(0x66, 1, 0x325);
             Console.WriteLine("Current Value Sensor 1: " + (response[1] * 255 + response[0]).ToString());
             response = eeipClient.GetAttributeSingle(0x66, 2, 0x325);

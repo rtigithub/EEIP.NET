@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -19,10 +20,6 @@ namespace Sres.Net.EEIP
         private uint multicastAddress;
         private ushort connectionSerialNumber;
         /// <summary>
-        /// TCP-Port of the Server
-        /// </summary>
-        public ushort TCPPort { get; set; } = 0xAF12;
-        /// <summary>
         /// UDP-Port of the IO-Adapter - Standard is 0xAF12
         /// </summary>
         public ushort TargetUDPPort { get; set; } = 0x08AE;
@@ -33,8 +30,7 @@ namespace Sres.Net.EEIP
         /// <summary>
         /// IPAddress of the Ethernet/IP Device
         /// </summary>
-        /// 
-        public string IPAddress { get; set; } = "172.0.0.1";
+        private IPAddress targetIpAddress = new IPAddress(new byte[] {172, 0, 0, 1});
         /// <summary>
         /// Requested Packet Rate (RPI) in Microseconds Originator -> Target for Implicit-Messaging (Default 0x7A120 -> 500ms)
         /// </summary>
@@ -204,7 +200,7 @@ namespace Sres.Net.EEIP
         /// <param name="address">IP-Address of the target device</param> 
         /// <param name="port">Port of the target device (default should be 0xAF12)</param> 
         /// <returns>Session Handle</returns>	
-        public uint RegisterSession(uint address, ushort port)
+        public uint RegisterSession(IPAddress address, ushort port)
         {
             if (sessionHandle != 0)
                 return sessionHandle;
@@ -214,10 +210,26 @@ namespace Sres.Net.EEIP
             encapsulation.CommandSpecificData.Add(0);       //Session options shall be set to "0"
             encapsulation.CommandSpecificData.Add(0);
 
-
-            var ipAddress = Encapsulation.CIPIdentityItem.getIPAddress(address);
-            IPAddress = ipAddress;
-            client = new TcpClient(ipAddress, port);
+            targetIpAddress = address;
+            client = new TcpClient(AddressFamily.InterNetwork);
+            try
+            {
+                client.Connect(address, port);
+            }
+            catch (Exception ex)
+            {
+                switch (ex)
+                {
+                    case ThreadAbortException _:
+                    case StackOverflowException _:
+                    case OutOfMemoryException _:
+                        throw;
+                    default:
+                        if (client.Client != null)
+                            client.Client.Close();
+                        throw ex;
+                }
+            }
             stream = client.GetStream();
 
             stream.Write(encapsulation.toBytes(), 0, encapsulation.toBytes().Length);
@@ -258,6 +270,9 @@ namespace Sres.Net.EEIP
         private bool udpClientReceiveClosed;
         public void ForwardOpen(bool largeForwardOpen)
         {
+            if (sessionHandle == 0) //If a Session is not Registered, Try to Registers a Session with the predefined IP-Address and Port
+                throw new InvalidOperationException("Register session first.");
+
             udpClientReceiveClosed = false;
             ushort o_t_headerOffset = 2;                    //Zählt den Sequencecount und evtl 32bit header zu der Länge dazu
             if (O_T_RealTimeFormat == RealTimeFormat.Header32Bit)
@@ -459,7 +474,7 @@ namespace Sres.Net.EEIP
                 commonPacketFormat.SocketaddrInfo_O_T.SIN_family = 2;
             if (O_T_ConnectionType == ConnectionType.Multicast)
             {
-                var multicastResponseAddress = GetMulticastAddress(BitConverter.ToUInt32(System.Net.IPAddress.Parse(IPAddress).GetAddressBytes(), 0));
+                var multicastResponseAddress = GetMulticastAddress(BitConverter.ToUInt32(targetIpAddress.GetAddressBytes(), 0));
 
                 commonPacketFormat.SocketaddrInfo_O_T.SIN_Address = multicastResponseAddress;
 
@@ -551,7 +566,7 @@ namespace Sres.Net.EEIP
             if (o_t_detectedLength == 0)
             {
                 if (sessionHandle == 0)
-                    RegisterSession();
+                    throw new InvalidOperationException("Register session first.");
                 o_t_detectedLength = (ushort)GetAttributeSingle(0x04, O_T_InstanceID, 3).Length;
                 return o_t_detectedLength;
             }
@@ -569,7 +584,7 @@ namespace Sres.Net.EEIP
             if (t_o_detectedLength == 0)
             {
                 if (sessionHandle == 0)
-                    RegisterSession();
+                    throw new InvalidOperationException("Register session first.");
                 t_o_detectedLength = (ushort)GetAttributeSingle(0x04, T_O_InstanceID, 3).Length;
                 return t_o_detectedLength;
             }
@@ -734,10 +749,8 @@ namespace Sres.Net.EEIP
             while (!stopUDP)
             {
                 var o_t_IOData = new byte[564];
-                var endPointsend = new IPEndPoint(System.Net.IPAddress.Parse(IPAddress), TargetUDPPort);
+                var endPointsend = new IPEndPoint(targetIpAddress, TargetUDPPort);
                
-                var send = new UdpState();
-                 
                 //---------------Item count
                 o_t_IOData[0] = 2;
                 o_t_IOData[1] = 0;
@@ -856,45 +869,47 @@ namespace Sres.Net.EEIP
         }
 
         /// <summary>
-        /// Sends a RegisterSession command to a target to initiate session
+        /// Sends a RegisterSession command to a target to initiate session with the Standard or predefined Port (Standard: 0xAF12).
+        /// For the scheme, use "ethernet-ip-1" or "ethernet-ip-2" all others default to "ethernet-ip-2" port, unless explicitly defined.
         /// </summary>
         /// <param name="address">IP-Address of the target device</param> 
-        /// <param name="port">Port of the target device (default should be 0xAF12)</param> 
         /// <returns>Session Handle</returns>	
-        public uint RegisterSession(string address, ushort port)
+        public uint RegisterSession(Uri address)
         {
-            var addressSubstring = address.Split('.');
-            var ipAddress = uint.Parse(addressSubstring[3]) + (uint.Parse(addressSubstring[2]) << 8) + (uint.Parse(addressSubstring[1]) << 16) + (uint.Parse(addressSubstring[0]) << 24);
+            if (!address.IsAbsoluteUri)
+            {
+                throw new ArgumentException("address must be absolute", nameof(address));
+            }
+
+            ushort port;
+            if (!address.IsDefaultPort)
+            {
+                port = (ushort)address.Port;
+            }
+            else
+            {
+                if (address.Scheme.Equals("ethernet-ip-1", StringComparison.OrdinalIgnoreCase))
+                {
+                    port = 0x08AE;
+                }
+                else
+                {
+                    // ethernet-ip-2 or default
+                    port = 0xAF12;
+                }
+            }
+
+            var ipAddress = Dns.GetHostAddresses(address.Host)
+                .First(x => x.AddressFamily == AddressFamily.InterNetwork);
+
             return RegisterSession(ipAddress, port);
-        }
-
-        /// <summary>
-        /// Sends a RegisterSession command to a target to initiate session with the Standard or predefined Port (Standard: 0xAF12)
-        /// </summary>
-        /// <param name="address">IP-Address of the target device</param> 
-        /// <returns>Session Handle</returns>	
-        public uint RegisterSession(string address)
-        {
-            var addressSubstring = address.Split('.');
-            var ipAddress = uint.Parse(addressSubstring[3]) + (uint.Parse(addressSubstring[2]) << 8) + (uint.Parse(addressSubstring[1]) << 16) + (uint.Parse(addressSubstring[0]) << 24);
-            return RegisterSession(ipAddress, TCPPort);
-        }
-
-        /// <summary>
-        /// Sends a RegisterSession command to a target to initiate session with the Standard or predefined Port and Predefined IPAddress (Standard-Port: 0xAF12)
-        /// </summary>
-        /// <returns>Session Handle</returns>	
-        public uint RegisterSession()
-        {
-            
-            return RegisterSession(IPAddress, TCPPort);
         }
 
         public byte[] GetAttributeSingle(int classID, int instanceID, int attributeID)
         {
             var requestedPath = GetEPath(classID, instanceID, attributeID);
             if (sessionHandle == 0)             //If a Session is not Registers, Try to Registers a Session with the predefined IP-Address and Port
-                RegisterSession();
+                throw new InvalidOperationException("Register session first.");
             var dataToSend = new byte[42+ requestedPath.Length];
             var encapsulation = new Encapsulation();
             encapsulation.SessionHandle = sessionHandle;
@@ -975,7 +990,7 @@ namespace Sres.Net.EEIP
         {
             var requestedPath = GetEPath(classID, instanceID, 0);
             if (sessionHandle == 0)             //If a Session is not Registered, Try to Registers a Session with the predefined IP-Address and Port
-                RegisterSession();
+                throw new InvalidOperationException("Register session first.");
             var dataToSend = new byte[42 + requestedPath.Length];
             var encapsulation = new Encapsulation();
             encapsulation.SessionHandle = sessionHandle;
@@ -1045,7 +1060,7 @@ namespace Sres.Net.EEIP
         {
             var requestedPath = GetEPath(classID, instanceID, attributeID);
             if (sessionHandle == 0)             //If a Session is not Registers, Try to Registers a Session with the predefined IP-Address and Port
-                RegisterSession();
+                throw new InvalidOperationException("Register session first.");
             var dataToSend = new byte[42 + value.Length + requestedPath.Length];
             var encapsulation = new Encapsulation();
             encapsulation.SessionHandle = sessionHandle;

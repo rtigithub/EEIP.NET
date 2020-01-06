@@ -21,9 +21,8 @@ namespace AllenBradleyPointIO
         {
             EEIPClient eeipClient = new EEIPClient();
             //Ip-Address of the Ethernet-IP Device (In this case Allen-Bradley 1734-AENT Point I/O)
-            eeipClient.IPAddress = "192.168.178.107";
             //A Session has to be registered before any communication can be established
-            eeipClient.RegisterSession();
+            eeipClient.RegisterSession(new Uri("tcp://192.168.178.107"));
 
             //Parameters from Originator -> Target
             eeipClient.O_T_InstanceID = 0x64;              //Instance ID of the Output Assembly

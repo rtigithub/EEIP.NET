@@ -18,9 +18,8 @@ namespace Keyence_NU_RP1_Implicit
         {
             EEIPClient eeipClient = new EEIPClient();
             //Ip-Address of the Ethernet-IP Device (In this case Keyence-NU-EP1)
-            eeipClient.IPAddress = "192.168.0.123";
             //A Session has to be registered before any communication can be established
-            eeipClient.RegisterSession();
+            eeipClient.RegisterSession(new Uri("tcp://192.168.0.123"));
 
             //Parameters from Originator -> Target
             eeipClient.O_T_InstanceID = 0xfe;              //Instance ID of the Output Assembly
