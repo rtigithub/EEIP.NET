@@ -138,9 +138,6 @@ namespace Sres.Net.EEIP
     
         public EEIPClient()
         {
-            Console.WriteLine("EEIP Library Version: " + Assembly.GetExecutingAssembly().GetName().Version.ToString());
-            Console.WriteLine("Copyright (c) Stefan Rossmann Engineering Solutions");
-            Console.WriteLine();
         }
 
         private void ReceiveCallback(IAsyncResult ar)
