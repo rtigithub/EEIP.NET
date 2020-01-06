@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -17,12 +18,18 @@ namespace Sres.Net.EEIP
         private uint sessionHandle;
         private uint connectionID_O_T;
         private uint connectionID_T_O;
+
+        /// <summary>
+        /// Value of IP address. The value is in big-endian format
+        /// </summary>
         private uint multicastAddress;
+
         private ushort connectionSerialNumber;
         /// <summary>
         /// UDP-Port of the IO-Adapter - Standard is 0xAF12
+        /// Received on SocketInfoItem message
         /// </summary>
-        public ushort TargetUDPPort { get; set; } = 0x08AE;
+        public ushort TargetUDPPort { get; private set; } = 0x08AE;
         /// <summary>
         /// UDP-Port of the Scanner - Standard is 0xAF12
         /// </summary>
@@ -132,27 +139,24 @@ namespace Sres.Net.EEIP
         /// </summary>        
         public DateTime LastReceivedImplicitMessage { get; set; }
 
-        private void ReceiveCallback(IAsyncResult ar)
+        private void ReceiveIdentityCallback(IAsyncResult ar)
         {
-            lock (this)
+            var udpState = (UdpState)ar.AsyncState;
+
+            var receiveBytes = udpState.u.EndReceive(ar, ref udpState.e);
+            var receiveString = Encoding.ASCII.GetString(receiveBytes);
+
+            // EndReceive worked and we have received data and remote endpoint
+            if (receiveBytes.Length > 0)
             {
-                var u = ((UdpState)ar.AsyncState).u;
-                
-                var e = ((UdpState)ar.AsyncState).e;
-
-                var receiveBytes = u.EndReceive(ar, ref e);
-                var receiveString = Encoding.ASCII.GetString(receiveBytes);
-
-                // EndReceive worked and we have received data and remote endpoint
-                if (receiveBytes.Length > 0)
+                var command = Convert.ToUInt16(receiveBytes[0]
+                                               | (receiveBytes[1] << 8));
+                if (command == 0x63)
                 {
-                    var command = Convert.ToUInt16(receiveBytes[0]
-                                                   | (receiveBytes[1] << 8));
-                    if (command == 0x63)
-                        returnList.Add(Encapsulation.CIPIdentityItem.getCIPIdentityItem(24, receiveBytes));
+                    receivedCipIdentities.TryAdd(Encapsulation.CIPIdentityItem.Deserialize(24, receiveBytes), 0);
                 }
-                var asyncResult = u.BeginReceive(ReceiveCallback, (UdpState)ar.AsyncState);
             }
+            var asyncResult = udpState.u.BeginReceive(ReceiveIdentityCallback, (UdpState)ar.AsyncState);
         }
 
         public class UdpState
@@ -161,17 +165,20 @@ namespace Sres.Net.EEIP
             public UdpClient u;
         }
 
-        private readonly List<Encapsulation.CIPIdentityItem> returnList = new List<Encapsulation.CIPIdentityItem>();
+        private readonly ConcurrentDictionary<Encapsulation.CIPIdentityItem, int> receivedCipIdentities = new ConcurrentDictionary<Encapsulation.CIPIdentityItem, int>();
 
         /// <summary>
-        /// List and identify potential targets. This command shall be sent as braodcast massage using UDP.
+        /// List and identify potential targets. This command shall be sent as broadcast massage using UDP.
         /// </summary>
-        /// <returns>List<Encapsulation.CIPIdentityItem> contains the received informations from all devices </returns>	
+        /// <returns><see cref="Encapsulation.CIPIdentityItem"/> contains the received informations from all devices </returns>	
         public List<Encapsulation.CIPIdentityItem> ListIdentity()
         {
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
                 if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                {
                     foreach (var ip in ni.GetIPProperties().UnicastAddresses)
+                    {
                         if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
                         {
                             var mask = ip.IPv4Mask;
@@ -187,11 +194,15 @@ namespace Sres.Net.EEIP
 
                             var s = new UdpState {e = endPoint, u = udpClient};
 
-                            var asyncResult = udpClient.BeginReceive(ReceiveCallback, s);
+                            var asyncResult = udpClient.BeginReceive(ReceiveIdentityCallback, s);
 
                             Thread.Sleep(1000);
                         }
-            return returnList;
+                    }
+                }
+            }
+
+            return receivedCipIdentities.Keys.ToList();
         }
 
         /// <summary>
@@ -232,7 +243,7 @@ namespace Sres.Net.EEIP
             }
             stream = client.GetStream();
 
-            stream.Write(encapsulation.toBytes(), 0, encapsulation.toBytes().Length);
+            stream.Write(encapsulation.SerializeToBytes(), 0, encapsulation.SerializeToBytes().Length);
             var data = new byte[256];
 
             var bytes = stream.Read(data, 0, data.Length);
@@ -254,7 +265,7 @@ namespace Sres.Net.EEIP
                 SessionHandle = sessionHandle,
             };
 
-            stream.Write(encapsulation.toBytes(), 0, encapsulation.toBytes().Length);
+            stream.Write(encapsulation.SerializeToBytes(), 0, encapsulation.SerializeToBytes().Length);
             var data = new byte[256];
             client.Close();
             stream.Close();
@@ -268,6 +279,7 @@ namespace Sres.Net.EEIP
 
         private UdpClient udpClientReceive;
         private bool udpClientReceiveClosed;
+
         public void ForwardOpen(bool largeForwardOpen)
         {
             if (sessionHandle == 0) //If a Session is not Registered, Try to Registers a Session with the predefined IP-Address and Port
@@ -468,30 +480,30 @@ namespace Sres.Net.EEIP
             }
             
             //AddSocket Addrress Item O->T
-            
-                commonPacketFormat.SocketaddrInfo_O_T = new Encapsulation.SocketAddress();
-                commonPacketFormat.SocketaddrInfo_O_T.SIN_port = OriginatorUDPPort;
-                commonPacketFormat.SocketaddrInfo_O_T.SIN_family = 2;
+
+            uint sinAddress;
             if (O_T_ConnectionType == ConnectionType.Multicast)
             {
-                var multicastResponseAddress = GetMulticastAddress(BitConverter.ToUInt32(targetIpAddress.GetAddressBytes(), 0));
-
-                commonPacketFormat.SocketaddrInfo_O_T.SIN_Address = multicastResponseAddress;
-
-                multicastAddress = commonPacketFormat.SocketaddrInfo_O_T.SIN_Address;
+                sinAddress = GetMulticastAddress(BitConverter.ToUInt32(this.targetIpAddress.GetAddressBytes(), 0));
+                multicastAddress = sinAddress;
             }
             else
             {
-                commonPacketFormat.SocketaddrInfo_O_T.SIN_Address = 0;
+                sinAddress = 0;
             }
 
-            encapsulation.Length = (ushort)(commonPacketFormat.toBytes().Length+6);//(ushort)(57 + (ushort)lengthOffset);
+            var socketaddrInfo_O_T = new Encapsulation.SocketAddress(2, OriginatorUDPPort, sinAddress);
+
+            commonPacketFormat.SocketaddrInfo_O_T = socketaddrInfo_O_T;
+
+            var commonPacketBytes = commonPacketFormat.SerializeToBytes();
+            encapsulation.Length = (ushort)(commonPacketBytes.Length+6);//(ushort)(57 + (ushort)lengthOffset);
             //20 04 24 01 2C 65 2C 6B
 
-            var dataToWrite = new byte[encapsulation.toBytes().Length + commonPacketFormat.toBytes().Length];
-            Buffer.BlockCopy(encapsulation.toBytes(), 0, dataToWrite, 0, encapsulation.toBytes().Length);
-            Buffer.BlockCopy(commonPacketFormat.toBytes(), 0, dataToWrite, encapsulation.toBytes().Length, commonPacketFormat.toBytes().Length);
-            //encapsulation.toBytes();
+            var encapsulationBytes = encapsulation.SerializeToBytes();
+            var dataToWrite = new byte[encapsulationBytes.Length + commonPacketBytes.Length];
+            Buffer.BlockCopy(encapsulationBytes, 0, dataToWrite, 0, encapsulationBytes.Length);
+            Buffer.BlockCopy(commonPacketBytes, 0, dataToWrite, encapsulationBytes.Length, commonPacketBytes.Length);
             
             stream.Write(dataToWrite, 0, dataToWrite.Length);
             var data = new byte[564];
@@ -517,15 +529,13 @@ namespace Sres.Net.EEIP
 
             //Is a SocketInfoItem present?
             var numberOfCurrentItem = 0;
-            Encapsulation.SocketAddress socketInfoItem;
             while (itemCount > 2)
             {
-                var typeID = data[40 + lengthUnconectedDataItem+ 20 * numberOfCurrentItem] + (data[40 + lengthUnconectedDataItem + 1+ 20 * numberOfCurrentItem] << 8);
+                var itemStartIndex = 40 + lengthUnconectedDataItem + 20 * numberOfCurrentItem;
+                var typeID = data[itemStartIndex] + (data[itemStartIndex + 1] << 8);
                 if (typeID == 0x8001)
                 {
-                    socketInfoItem = new Encapsulation.SocketAddress();
-                    socketInfoItem.SIN_Address = data[40 + lengthUnconectedDataItem + 8 + 20 * numberOfCurrentItem] + (uint)(data[40 + lengthUnconectedDataItem + 9 + 20 * numberOfCurrentItem] << 8) + (uint)(data[40 + lengthUnconectedDataItem + 10 + 20 * numberOfCurrentItem] << 16) + (uint)(data[40 + lengthUnconectedDataItem + 11 + 20 * numberOfCurrentItem] << 24);
-                    socketInfoItem.SIN_port = (ushort)(data[40 + lengthUnconectedDataItem + 7 + 20 * numberOfCurrentItem] + (ushort)(data[40 + lengthUnconectedDataItem + 6 + 20 * numberOfCurrentItem] << 8));
+                    var socketInfoItem = Encapsulation.SocketAddress.FromBytes(data, itemStartIndex + 4);
                     if (T_O_ConnectionType == ConnectionType.Multicast)
                         multicastAddress = socketInfoItem.SIN_Address;
                     TargetUDPPort = socketInfoItem.SIN_port;
@@ -591,6 +601,7 @@ namespace Sres.Net.EEIP
             return t_o_detectedLength;
         }
 
+        /// <param name="deviceIPAddress">Value of IP address. The value is in big-endian format</param>
         private static uint GetMulticastAddress(uint deviceIPAddress)
         {
             var cip_Mcast_Base_Addr = 0xEFC00100;
@@ -717,10 +728,10 @@ namespace Sres.Net.EEIP
                 commonPacketFormat.Data.Add(T_O_InstanceID);
             }
 
-            var dataToWrite = new byte[encapsulation.toBytes().Length + commonPacketFormat.toBytes().Length];
-            Buffer.BlockCopy(encapsulation.toBytes(), 0, dataToWrite, 0, encapsulation.toBytes().Length);
-            Buffer.BlockCopy(commonPacketFormat.toBytes(), 0, dataToWrite, encapsulation.toBytes().Length, commonPacketFormat.toBytes().Length);
-            encapsulation.toBytes();
+            var dataToWrite = new byte[encapsulation.SerializeToBytes().Length + commonPacketFormat.SerializeToBytes().Length];
+            Buffer.BlockCopy(encapsulation.SerializeToBytes(), 0, dataToWrite, 0, encapsulation.SerializeToBytes().Length);
+            Buffer.BlockCopy(commonPacketFormat.SerializeToBytes(), 0, dataToWrite, encapsulation.SerializeToBytes().Length, commonPacketFormat.SerializeToBytes().Length);
+            encapsulation.SerializeToBytes();
 
             stream.Write(dataToWrite, 0, dataToWrite.Length);
             var data = new byte[564];
@@ -959,10 +970,10 @@ namespace Sres.Net.EEIP
             for (var i = 0; i < requestedPath.Length; i++)
                 commonPacketFormat.Data.Add(requestedPath[i]);
 
-            var dataToWrite = new byte[encapsulation.toBytes().Length + commonPacketFormat.toBytes().Length];
-            Buffer.BlockCopy(encapsulation.toBytes(), 0, dataToWrite, 0, encapsulation.toBytes().Length);
-            Buffer.BlockCopy(commonPacketFormat.toBytes(), 0, dataToWrite, encapsulation.toBytes().Length, commonPacketFormat.toBytes().Length);
-            encapsulation.toBytes();
+            var dataToWrite = new byte[encapsulation.SerializeToBytes().Length + commonPacketFormat.SerializeToBytes().Length];
+            Buffer.BlockCopy(encapsulation.SerializeToBytes(), 0, dataToWrite, 0, encapsulation.SerializeToBytes().Length);
+            Buffer.BlockCopy(commonPacketFormat.SerializeToBytes(), 0, dataToWrite, encapsulation.SerializeToBytes().Length, commonPacketFormat.SerializeToBytes().Length);
+            encapsulation.SerializeToBytes();
 
             stream.Write(dataToWrite, 0, dataToWrite.Length);
             var data = new byte[564];
@@ -1036,9 +1047,9 @@ namespace Sres.Net.EEIP
             for (var i = 0; i < requestedPath.Length; i++)
                 commonPacketFormat.Data.Add(requestedPath[i]);
 
-            var dataToWrite = new byte[encapsulation.toBytes().Length + commonPacketFormat.toBytes().Length];
-            Buffer.BlockCopy(encapsulation.toBytes(), 0, dataToWrite, 0, encapsulation.toBytes().Length);
-            Buffer.BlockCopy(commonPacketFormat.toBytes(), 0, dataToWrite, encapsulation.toBytes().Length, commonPacketFormat.toBytes().Length);
+            var dataToWrite = new byte[encapsulation.SerializeToBytes().Length + commonPacketFormat.SerializeToBytes().Length];
+            Buffer.BlockCopy(encapsulation.SerializeToBytes(), 0, dataToWrite, 0, encapsulation.SerializeToBytes().Length);
+            Buffer.BlockCopy(commonPacketFormat.SerializeToBytes(), 0, dataToWrite, encapsulation.SerializeToBytes().Length, commonPacketFormat.SerializeToBytes().Length);
            
 
             stream.Write(dataToWrite, 0, dataToWrite.Length);
@@ -1114,10 +1125,10 @@ namespace Sres.Net.EEIP
                 commonPacketFormat.Data.Add(value[i]);
             //----------------Data
 
-            var dataToWrite = new byte[encapsulation.toBytes().Length + commonPacketFormat.toBytes().Length];
-            Buffer.BlockCopy(encapsulation.toBytes(), 0, dataToWrite, 0, encapsulation.toBytes().Length);
-            Buffer.BlockCopy(commonPacketFormat.toBytes(), 0, dataToWrite, encapsulation.toBytes().Length, commonPacketFormat.toBytes().Length);
-            encapsulation.toBytes();
+            var dataToWrite = new byte[encapsulation.SerializeToBytes().Length + commonPacketFormat.SerializeToBytes().Length];
+            Buffer.BlockCopy(encapsulation.SerializeToBytes(), 0, dataToWrite, 0, encapsulation.SerializeToBytes().Length);
+            Buffer.BlockCopy(commonPacketFormat.SerializeToBytes(), 0, dataToWrite, encapsulation.SerializeToBytes().Length, commonPacketFormat.SerializeToBytes().Length);
+            encapsulation.SerializeToBytes();
 
             stream.Write(dataToWrite, 0, dataToWrite.Length);
             var data = new byte[564];

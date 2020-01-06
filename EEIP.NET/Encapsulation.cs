@@ -9,7 +9,7 @@ namespace Sres.Net.EEIP
         public CommandsEnum Command { get; set; }
         public ushort Length { get; set; }
         public uint SessionHandle { get; set; }
-        public StatusEnum Status { get; }
+        public StatusEnum Status { get; set; }
         private readonly byte[] senderContext = new byte[8];
         private readonly uint options = 0;
         public List<byte> CommandSpecificData = new List<byte>();
@@ -45,7 +45,7 @@ namespace Sres.Net.EEIP
             Cancel = 0x0073
         }
 
-        public byte[] toBytes()
+        public byte[] SerializeToBytes()
         {
             var returnValue = new byte[24 + CommandSpecificData.Count];
             returnValue[0] = (byte)Command;
@@ -83,68 +83,101 @@ namespace Sres.Net.EEIP
         /// </summary>
         public class CIPIdentityItem
         {
-            public ushort ItemTypeCode;                               //Code indicating item type of CIP Identity (0x0C)
-            public ushort ItemLength;                                 //Number of bytes in item which follow (length varies depending on Product Name string)
-            public ushort EncapsulationProtocolVersion;               //Encapsulation Protocol Version supported (also returned with Register Sesstion reply).
-            public SocketAddress SocketAddress = new SocketAddress(); //Socket Address (see section 2-6.3.2)
-            public ushort VendorID1;                                  //Device manufacturers Vendor ID
-            public ushort DeviceType1;                                //Device Type of product
-            public ushort ProductCode1;                               //Product Code assigned with respect to device type
-            public byte[] Revision1 = new byte[2];                    //Device revision
-            public ushort Status1;                                    //Current status of device
-            public uint SerialNumber1;                                //Serial number of device
-            public byte ProductNameLength;
-            public string ProductName1; //Human readable description of device
-            public byte State1;         //Current state of device
+            public ushort ItemTypeCode { get; }                               //Code indicating item type of CIP Identity (0x0C)
+            public ushort ItemLength { get; } //Number of bytes in item which follow (length varies depending on Product Name string)
+            public ushort EncapsulationProtocolVersion { get; } //Encapsulation Protocol Version supported (also returned with Register Sesstion reply).
+            public SocketAddress SocketAddress { get; } = new SocketAddress(); //Socket Address (see section 2-6.3.2)
+            public ushort VendorID1 { get; } //Device manufacturers Vendor ID
+            public ushort DeviceType1 { get; } //Device Type of product
+            public ushort ProductCode1 { get; } //Product Code assigned with respect to device type
+            public byte[] Revision1 { get; } = new byte[2];                    //Device revision
+            public ushort Status1 { get; } //Current status of device
+            public uint SerialNumber1 { get; } //Serial number of device
+            public byte ProductNameLength { get; }
+            public string ProductName1 { get; } //Human readable description of device
+            public byte State1 { get; } //Current state of device
 
+            public static CIPIdentityItem Deserialize(int startingByte, byte[] receivedData)
+            {
+                return new CIPIdentityItem(startingByte, receivedData);
+            }
 
-            public static CIPIdentityItem getCIPIdentityItem(int startingByte, byte[] receivedData)
+            private CIPIdentityItem(int startingByte, byte[] receivedData)
             {
                 startingByte = startingByte + 2; //Skipped ItemCount
-                var cipIdentityItem = new CIPIdentityItem();
-                cipIdentityItem.ItemTypeCode = Convert.ToUInt16(receivedData[0 + startingByte]
-                                                                | (receivedData[1 + startingByte] << 8));
-                cipIdentityItem.ItemLength = Convert.ToUInt16(receivedData[2 + startingByte]
-                                                              | (receivedData[3 + startingByte] << 8));
-                cipIdentityItem.EncapsulationProtocolVersion = Convert.ToUInt16(receivedData[4 + startingByte]
-                                                                                | (receivedData[5 + startingByte] << 8));
-                cipIdentityItem.SocketAddress.SIN_family = Convert.ToUInt16(receivedData[7 + startingByte]
-                                                                            | (receivedData[6 + startingByte] << 8));
-                cipIdentityItem.SocketAddress.SIN_port = Convert.ToUInt16(receivedData[9 + startingByte]
-                                                                          | (receivedData[8 + startingByte] << 8));
-                cipIdentityItem.SocketAddress.SIN_Address = (uint)(receivedData[13 + startingByte]
-                                                                   | (receivedData[12 + startingByte] << 8)
-                                                                   | (receivedData[11 + startingByte] << 16)
-                                                                   | (receivedData[10 + startingByte] << 24)
-                    );
-                cipIdentityItem.VendorID1 = Convert.ToUInt16(receivedData[22 + startingByte]
-                                                             | (receivedData[23 + startingByte] << 8));
-                cipIdentityItem.DeviceType1 = Convert.ToUInt16(receivedData[24 + startingByte]
-                                                               | (receivedData[25 + startingByte] << 8));
-                cipIdentityItem.ProductCode1 = Convert.ToUInt16(receivedData[26 + startingByte]
-                                                                | (receivedData[27 + startingByte] << 8));
-                cipIdentityItem.Revision1[0] = receivedData[28 + startingByte];
-                cipIdentityItem.Revision1[1] = receivedData[29 + startingByte];
-                cipIdentityItem.Status1 = Convert.ToUInt16(receivedData[30 + startingByte]
-                                                           | (receivedData[31 + startingByte] << 8));
-                cipIdentityItem.SerialNumber1 = (uint)(receivedData[32 + startingByte]
-                                                       | (receivedData[33 + startingByte] << 8)
-                                                       | (receivedData[34 + startingByte] << 16)
-                                                       | (receivedData[35 + startingByte] << 24));
-                cipIdentityItem.ProductNameLength = receivedData[36 + startingByte];
-                cipIdentityItem.ProductName1 = Encoding.ASCII.GetString(receivedData, 37 + startingByte, cipIdentityItem.ProductNameLength);
-                cipIdentityItem.State1 = receivedData[receivedData.Length - 1];
-                return cipIdentityItem;
+                ItemTypeCode = Convert.ToUInt16(receivedData[0 + startingByte]
+                                                | (receivedData[1 + startingByte] << 8));
+                ItemLength = Convert.ToUInt16(receivedData[2 + startingByte]
+                                              | (receivedData[3 + startingByte] << 8));
+                EncapsulationProtocolVersion = Convert.ToUInt16(receivedData[4 + startingByte]
+                                                                | (receivedData[5 + startingByte] << 8));
+                SocketAddress = SocketAddress.FromBytes(receivedData, 6 + startingByte);
+                VendorID1 = Convert.ToUInt16(receivedData[22 + startingByte]
+                                             | (receivedData[23 + startingByte] << 8));
+                DeviceType1 = Convert.ToUInt16(receivedData[24 + startingByte]
+                                               | (receivedData[25 + startingByte] << 8));
+                ProductCode1 = Convert.ToUInt16(receivedData[26 + startingByte]
+                                                | (receivedData[27 + startingByte] << 8));
+                Revision1 = new[] {receivedData[28 + startingByte], receivedData[29 + startingByte]};
+                Status1 = Convert.ToUInt16(receivedData[30 + startingByte]
+                                           | (receivedData[31 + startingByte] << 8));
+                SerialNumber1 = (uint)(receivedData[32 + startingByte]
+                                       | (receivedData[33 + startingByte] << 8)
+                                       | (receivedData[34 + startingByte] << 16)
+                                       | (receivedData[35 + startingByte] << 24));
+                ProductNameLength = receivedData[36 + startingByte];
+                ProductName1 = Encoding.ASCII.GetString(receivedData, 37 + startingByte, ProductNameLength);
+                State1 = receivedData[receivedData.Length - 1];
             }
-            /// <summary>
-            ///     Converts an IP-Address in UIint32 Format (Received by Device)
-            /// </summary>
-            public static string getIPAddress(uint address)
+
+            protected bool Equals(CIPIdentityItem other)
             {
-                return (byte)(address >> 24) + "." + (byte)(address >> 16) + "." + (byte)(address >> 8) + "." + (byte)address;
+                return ItemTypeCode == other.ItemTypeCode
+                       && ItemLength == other.ItemLength
+                       && EncapsulationProtocolVersion == other.EncapsulationProtocolVersion
+                       && Equals(SocketAddress, other.SocketAddress)
+                       && VendorID1 == other.VendorID1
+                       && DeviceType1 == other.DeviceType1
+                       && ProductCode1 == other.ProductCode1
+                       && Equals(Revision1, other.Revision1)
+                       && Status1 == other.Status1
+                       && SerialNumber1 == other.SerialNumber1
+                       && ProductNameLength == other.ProductNameLength
+                       && ProductName1 == other.ProductName1
+                       && State1 == other.State1;
             }
 
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != this.GetType())
+                    return false;
+                return Equals((CIPIdentityItem)obj);
+            }
 
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    var hashCode = ItemTypeCode.GetHashCode();
+                    hashCode = (hashCode * 397) ^ ItemLength.GetHashCode();
+                    hashCode = (hashCode * 397) ^ EncapsulationProtocolVersion.GetHashCode();
+                    hashCode = (hashCode * 397) ^ SocketAddress.GetHashCode();
+                    hashCode = (hashCode * 397) ^ VendorID1.GetHashCode();
+                    hashCode = (hashCode * 397) ^ DeviceType1.GetHashCode();
+                    hashCode = (hashCode * 397) ^ ProductCode1.GetHashCode();
+                    hashCode = (hashCode * 397) ^ Revision1.GetHashCode();
+                    hashCode = (hashCode * 397) ^ Status1.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (int)SerialNumber1;
+                    hashCode = (hashCode * 397) ^ ProductNameLength.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (ProductName1 != null ? ProductName1.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ State1.GetHashCode();
+                    return hashCode;
+                }
+            }
         }
 
         /// <summary>
@@ -152,26 +185,84 @@ namespace Sres.Net.EEIP
         /// </summary>
         public class SocketAddress
         {
-            public ushort SIN_family;
-            public ushort SIN_port;
-            public uint SIN_Address;
-            public byte[] SIN_Zero = new byte[8];
+            public SocketAddress()
+            {
+            }
+
+            /// <param name="sinAddress">Value of IP address. The value is in big-endian format</param>
+            public SocketAddress(ushort sinFamily, ushort sinPort, uint sinAddress)
+            {
+                SIN_family = sinFamily;
+                SIN_port = sinPort;
+                SIN_Address = sinAddress;
+            }
+
+            public ushort SIN_family { get; }
+            public ushort SIN_port { get; }
+            
+            /// <summary>
+            /// Value of IP address. The value is in big-endian format
+            /// </summary>
+            public uint SIN_Address { get; }
+
+            public byte[] SIN_Zero { get; } = new byte[8];
+
+            protected bool Equals(SocketAddress other)
+            {
+                return SIN_family == other.SIN_family
+                       && SIN_port == other.SIN_port
+                       && SIN_Address == other.SIN_Address;
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != this.GetType())
+                    return false;
+                return Equals((SocketAddress)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    var hashCode = SIN_family.GetHashCode();
+                    hashCode = (hashCode * 397) ^ SIN_port.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (int)SIN_Address;
+                    return hashCode;
+                }
+            }
+            public static SocketAddress FromBytes(byte[] data, int startIndex)
+            {
+                var family = (ushort)(data[startIndex + 1]
+                                      | (data[startIndex + 0] << 8));
+                var port = (ushort)(data[startIndex + 3]
+                                    | (data[startIndex + 2] << 8));
+                var address = (uint)(data[startIndex + 4]
+                                     | (data[startIndex + 5] << 8)
+                                     | (data[startIndex + 6] << 16)
+                                     | (data[startIndex + 7] << 24));
+
+                return new SocketAddress(family, port, address);
+            }
         }
 
         public class CommonPacketFormat
         {
-            public ushort ItemCount = 2;
-            public ushort AddressItem = 0x0000;
-            public ushort AddressLength = 0;
-            public ushort DataItem = 0xB2; //0xB2 = Unconnected Data Item
-            public ushort DataLength = 8;
-            public List<byte> Data = new List<byte>();
-            public ushort SockaddrInfoItem_O_T = 0x8001; //8000 for O->T and 8001 for T->O - Volume 2 Table 2-6.9
-            public ushort SockaddrInfoLength = 16;
-            public SocketAddress SocketaddrInfo_O_T = null;
+            public ushort ItemCount { get; set; } = 2;
+            public ushort AddressItem { get; set; } = 0x0000;
+            public ushort AddressLength { get; set; } = 0;
+            public ushort DataItem { get; set; } = 0xB2; //0xB2 = Unconnected Data Item
+            public ushort DataLength { get; set; } = 8;
+            public List<byte> Data { get; } = new List<byte>();
+            public ushort SockaddrInfoItem_O_T { get; set; } = 0x8001; //8000 for O->T and 8001 for T->O - Volume 2 Table 2-6.9
+            public ushort SockaddrInfoLength { get; set; } = 16;
+            public SocketAddress SocketaddrInfo_O_T { get; set; } = null;
 
-
-            public byte[] toBytes()
+            public byte[] SerializeToBytes()
             {
                 if (SocketaddrInfo_O_T != null)
                     ItemCount = 3;
@@ -189,7 +280,6 @@ namespace Sres.Net.EEIP
                 for (var i = 0; i < Data.Count; i++)
                     returnValue[10 + i] = Data[i];
 
-
                 // Add Socket Address Info Item
                 if (SocketaddrInfo_O_T != null)
                 {
@@ -201,10 +291,10 @@ namespace Sres.Net.EEIP
                     returnValue[10 + Data.Count + 4] = (byte)(SocketaddrInfo_O_T.SIN_family >> 8);
                     returnValue[10 + Data.Count + 7] = (byte)SocketaddrInfo_O_T.SIN_port;
                     returnValue[10 + Data.Count + 6] = (byte)(SocketaddrInfo_O_T.SIN_port >> 8);
-                    returnValue[10 + Data.Count + 11] = (byte)SocketaddrInfo_O_T.SIN_Address;
-                    returnValue[10 + Data.Count + 10] = (byte)(SocketaddrInfo_O_T.SIN_Address >> 8);
-                    returnValue[10 + Data.Count + 9] = (byte)(SocketaddrInfo_O_T.SIN_Address >> 16);
-                    returnValue[10 + Data.Count + 8] = (byte)(SocketaddrInfo_O_T.SIN_Address >> 24);
+                    returnValue[10 + Data.Count + 8] = (byte)SocketaddrInfo_O_T.SIN_Address;
+                    returnValue[10 + Data.Count + 9] = (byte)(SocketaddrInfo_O_T.SIN_Address >> 8);
+                    returnValue[10 + Data.Count + 10] = (byte)(SocketaddrInfo_O_T.SIN_Address >> 16);
+                    returnValue[10 + Data.Count + 11] = (byte)(SocketaddrInfo_O_T.SIN_Address >> 24);
                     returnValue[10 + Data.Count + 12] = SocketaddrInfo_O_T.SIN_Zero[0];
                     returnValue[10 + Data.Count + 13] = SocketaddrInfo_O_T.SIN_Zero[1];
                     returnValue[10 + Data.Count + 14] = SocketaddrInfo_O_T.SIN_Zero[2];
