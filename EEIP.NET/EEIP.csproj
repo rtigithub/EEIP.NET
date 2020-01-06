@@ -45,7 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CIP.cs" />
+    <Compile Include="ConnectionType.cs" />
+    <Compile Include="GeneralStatusCodes.cs" />
+    <Compile Include="CIPCommonServices.cs" />
+    <Compile Include="CIPException.cs" />
     <Compile Include="EIPClient.cs" />
     <Compile Include="Encapsulation.cs" />
     <Compile Include="ObjectLibrary\TcpIpInterfaceObject.cs" />
@@ -53,7 +56,9 @@
     <Compile Include="ObjectLibrary\ConnectionManagerObject.cs" />
     <Compile Include="ObjectLibrary\IdentityObject.cs" />
     <Compile Include="ObjectLibrary\MessageRouterObject.cs" />
+    <Compile Include="Priority.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RealTimeFormat.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
