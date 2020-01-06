@@ -68,7 +68,7 @@ namespace Sres.Net.EEIP
         /// </summary>
         public ushort O_T_Length { get; set; } = 505;                //For Forward Open - Max 505
         /// <summary>
-        /// The maximum size in bytes (only pure data woithout sequence count and 32-Bit Real Time Header (if present)) from Target -> Originator for Implicit Messaging (Default: 505)
+        /// The maximum size in bytes (only pure data without sequence count and 32-Bit Real Time Header (if present)) from Target -> Originator for Implicit Messaging (Default: 505)
         /// </summary>
         public ushort T_O_Length { get; set; } = 505;                //For Forward Open - Max 505
         /// <summary>
@@ -157,13 +157,12 @@ namespace Sres.Net.EEIP
                 }
                 var asyncResult = u.BeginReceive(ReceiveCallback, (UdpState)ar.AsyncState);
             }
-
         }
+
         public class UdpState
         {
             public IPEndPoint e;
             public UdpClient u;
-
         }
 
         private readonly List<Encapsulation.CIPIdentityItem> returnList = new List<Encapsulation.CIPIdentityItem>();
@@ -174,7 +173,6 @@ namespace Sres.Net.EEIP
         /// <returns>List<Encapsulation.CIPIdentityItem> contains the received informations from all devices </returns>	
         public List<Encapsulation.CIPIdentityItem> ListIdentity()
         {
-            
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
                 if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
                     foreach (var ip in ni.GetIPProperties().UnicastAddresses)
@@ -191,9 +189,7 @@ namespace Sres.Net.EEIP
                             var endPoint = new IPEndPoint(System.Net.IPAddress.Parse(multicastAddress), 44818);
                             udpClient.Send(sendData, sendData.Length, endPoint);
 
-                            var s = new UdpState();
-                            s.e = endPoint;
-                            s.u = udpClient;
+                            var s = new UdpState {e = endPoint, u = udpClient};
 
                             var asyncResult = udpClient.BeginReceive(ReceiveCallback, s);
 
@@ -212,9 +208,7 @@ namespace Sres.Net.EEIP
         {
             if (sessionHandle != 0)
                 return sessionHandle;
-            var encapsulation = new Encapsulation();
-            encapsulation.Command = Encapsulation.CommandsEnum.RegisterSession;
-            encapsulation.Length = 4;
+            var encapsulation = new Encapsulation {Command = Encapsulation.CommandsEnum.RegisterSession, Length = 4};
             encapsulation.CommandSpecificData.Add(1);       //Protocol version (should be set to 1)
             encapsulation.CommandSpecificData.Add(0);
             encapsulation.CommandSpecificData.Add(0);       //Session options shall be set to "0"
@@ -241,11 +235,13 @@ namespace Sres.Net.EEIP
         /// </summary> 
         public void UnRegisterSession()
         {
-            var encapsulation = new Encapsulation();
-            encapsulation.Command = Encapsulation.CommandsEnum.UnRegisterSession;
-            encapsulation.Length = 0;
-            encapsulation.SessionHandle =  sessionHandle;
- 
+            var encapsulation = new Encapsulation
+            {
+                Command = Encapsulation.CommandsEnum.UnRegisterSession,
+                Length = 0,
+                SessionHandle = sessionHandle,
+            };
+
             stream.Write(encapsulation.toBytes(), 0, encapsulation.toBytes().Length);
             var data = new byte[256];
             client.Close();
@@ -522,20 +518,15 @@ namespace Sres.Net.EEIP
                 numberOfCurrentItem++;
                 itemCount--;
             }
+
             //Open UDP-Port
-
-
-
             var endPointReceive = new IPEndPoint(System.Net.IPAddress.Any, OriginatorUDPPort);
             udpClientReceive = new UdpClient(endPointReceive);
-            var s = new UdpState();
-            s.e = endPointReceive;
-            s.u = udpClientReceive;
+            var s = new UdpState {e = endPointReceive, u = udpClientReceive};
             if (multicastAddress != 0)
             {
                 var multicast = new IPAddress(multicastAddress);
                 udpClientReceive.JoinMulticastGroup(multicast);
-              
             }
 
             var sendThread = new Thread(sendUDP);
@@ -606,7 +597,6 @@ namespace Sres.Net.EEIP
             mcastIndex = mcastIndex & cip_Host_Mask;
 
             return cip_Mcast_Base_Addr + mcastIndex * 32;
-
         }
 
         public void ForwardClose()
@@ -614,7 +604,6 @@ namespace Sres.Net.EEIP
             //First stop the Thread which send data
 
             stopUDP = true;
-
 
             var lengthOffset = 5 + (O_T_ConnectionType == ConnectionType.Null ? 0 : 2) + (T_O_ConnectionType == ConnectionType.Null ? 0 : 2);
 
@@ -731,10 +720,6 @@ namespace Sres.Net.EEIP
             //Close the Socket for Receive
             udpClientReceiveClosed = true;
             udpClientReceive.Close();
-  
-           
-
-
         }
 
         private bool stopUDP;
@@ -824,17 +809,11 @@ namespace Sres.Net.EEIP
                     Array.Copy(_O_T_IOData, 0, o_t_IOData, 20 + headerOffset, O_T_Length);
                 }
                 //---------------Write data
-
-
-
-
                 udpClientsend.Send(o_t_IOData, O_T_Length+20+headerOffset, endPointsend);
                 Thread.Sleep((int)RequestedPacketRate_O_T/1000);
-
             }
 
             udpClientsend.Close();
-
         }
 
         private void ReceiveCallbackClass1(IAsyncResult ar)
@@ -875,8 +854,6 @@ namespace Sres.Net.EEIP
             }
             LastReceivedImplicitMessage = DateTime.Now;
         }
-
-
 
         /// <summary>
         /// Sends a RegisterSession command to a target to initiate session
@@ -1152,7 +1129,7 @@ namespace Sres.Net.EEIP
         /// <param name="instanceID">Requested Instance ID</param>
         /// <param name="attributeID">Requested Attribute ID - if "0" the attribute will be ignored</param>
         /// <returns>Encrypted Request Path</returns>
-        private byte[] GetEPath(int classID, int instanceID, int attributeID)
+        private static byte[] GetEPath(int classID, int instanceID, int attributeID)
         {
             var byteCount = 0;
             if (classID < 0xff)
@@ -1219,7 +1196,6 @@ namespace Sres.Net.EEIP
                 }
 
             return returnValue;
-
         }
 
         /// <summary>
@@ -1335,8 +1311,7 @@ namespace Sres.Net.EEIP
         /// <param name="byteArray">bytearray to convert</param> 
         public static ushort ToUshort(byte[] byteArray)
         {
-            ushort returnValue;
-            returnValue = (ushort)((byteArray[1] << 8) | byteArray[0]);
+            var returnValue = (ushort)((byteArray[1] << 8) | byteArray[0]);
             return returnValue;
         }
 
