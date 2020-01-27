@@ -11,7 +11,7 @@ using Sres.Net.EEIP.ObjectLibrary;
 
 namespace Sres.Net.EEIP
 {
-    public class EEIPClient
+    public class EEIPClient : IDisposable
     {
         private TcpClient client;
         private NetworkStream stream;
@@ -236,8 +236,8 @@ namespace Sres.Net.EEIP
                     case OutOfMemoryException _:
                         throw;
                     default:
-                        if (client.Client != null)
-                            client.Client.Close();
+                        ((IDisposable)client).Dispose();
+                        this.client = null;
                         throw ex;
                 }
             }
@@ -267,8 +267,10 @@ namespace Sres.Net.EEIP
 
             stream.Write(encapsulation.SerializeToBytes(), 0, encapsulation.SerializeToBytes().Length);
             var data = new byte[256];
-            client.Close();
-            stream.Close();
+            ((IDisposable)client).Dispose();
+            client = null;
+            stream.Dispose();
+            stream = null;
             sessionHandle = 0;
         }
 
@@ -1381,6 +1383,12 @@ namespace Sres.Net.EEIP
         {
            
             return ((inputByte>>bitposition)&0x01) != 0 ? true : false;
+        }
+        public void Dispose()
+        {
+            ((IDisposable)this.client)?.Dispose();
+            this.stream?.Dispose();
+            ((IDisposable)this.udpClientReceive)?.Dispose();
         }
     }
 }
