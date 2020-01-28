@@ -1,0 +1,1082 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>EEIP</name>
+  </assembly>
+  <members>
+    <member name="T:Sres.Net.EEIP.CIPCommonServices">
+      <summary>
+   Table A-3.1 Volume 1 Chapter A-3
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.CIPException">
+      <summary>
+   Class CIPException.
+   Implements the <see cref="T:System.Exception" /></summary>
+      <seealso cref="T:System.Exception" />
+    </member>
+    <member name="T:Sres.Net.EEIP.GeneralStatusCodes">
+      <summary>
+   Table B-1.1 CIP General Status Codes
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Get_Attributes_All">
+      <summary>
+   The get attributes all
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Set_Attributes_All_Request">
+      <summary>
+   The set attributes all request
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Get_Attribute_List">
+      <summary>
+   The get attribute list
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Set_Attribute_List">
+      <summary>
+   The set attribute list
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Reset">
+      <summary>
+   The reset
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Start">
+      <summary>
+   The start
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Stop">
+      <summary>
+   The stop
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Create">
+      <summary>
+   The create
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Delete">
+      <summary>
+   The delete
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Multiple_Service_Packet">
+      <summary>
+   The multiple service packet
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Apply_Attributes">
+      <summary>
+   The apply attributes
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Get_Attribute_Single">
+      <summary>
+   The get attribute single
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Set_Attribute_Single">
+      <summary>
+   The set attribute single
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Find_Next_Object_Instance">
+      <summary>
+   The find next object instance
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Error_Response">
+      <summary>
+   The error response
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Restore">
+      <summary>
+   The restore
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Save">
+      <summary>
+   The save
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.NOP">
+      <summary>
+   The nop
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Get_Member">
+      <summary>
+   The get member
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Set_Member">
+      <summary>
+   The set member
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Insert_Member">
+      <summary>
+   The insert member
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.Remove_Member">
+      <summary>
+   The remove member
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.CIPCommonServices.GroupSync">
+      <summary>
+   The group synchronize
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.CIPException.#ctor">
+      <summary>
+   Initializes a new instance of the <see cref="T:Sres.Net.EEIP.CIPException" /> class.
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.CIPException.#ctor(System.String)">
+      <summary>
+   Initializes a new instance of the <see cref="T:Sres.Net.EEIP.CIPException" /> class.
+   </summary>
+      <param name="message">The message that describes the error.</param>
+    </member>
+    <member name="M:Sres.Net.EEIP.CIPException.#ctor(System.String,Exception)">
+      <summary>
+   Initializes a new instance of the <see cref="T:Sres.Net.EEIP.CIPException" /> class.
+   </summary>
+      <param name="message">The message.</param>
+      <param name="inner">The inner.</param>
+    </member>
+    <member name="M:Sres.Net.EEIP.GeneralStatusCodes.GetStatusCode(System.Byte)">
+      <summary>
+   Gets the status code.
+   </summary>
+      <param name="code">The code.</param>
+      <returns>System.String.</returns>
+    </member>
+    <member name="T:Sres.Net.EEIP.EEIPClient">
+      <summary>
+   Class EEIPClient.
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.EEIPClient.UdpState">
+      <summary>
+   Class UdpState.
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.ConnectionType">
+      <summary>
+   Enum ConnectionType
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.Priority">
+      <summary>
+   Enum Priority
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.RealTimeFormat">
+      <summary>
+   Enum RealTimeFormat
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.TCPPort">
+      <summary>
+   TCP-Port of the Server
+   </summary>
+      <value>The TCP port.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.TargetUDPPort">
+      <summary>
+   UDP-Port of the IO-Adapter - Standard is 0xAF12
+   </summary>
+      <value>The target UDP port.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.OriginatorUDPPort">
+      <summary>
+   UDP-Port of the Scanner - Standard is 0xAF12
+   </summary>
+      <value>The originator UDP port.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.IPAddress">
+      <summary>
+   IPAddress of the Ethernet/IP Device
+   </summary>
+      <value>The ip address.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.RequestedPacketRate_O_T">
+      <summary>
+   Requested Packet Rate (RPI) in Microseconds Originator -&gt; Target for Implicit-Messaging (Default 0x7A120 -&gt; 500ms)
+   </summary>
+      <value>The requested packet rate o t.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.RequestedPacketRate_T_O">
+      <summary>
+   Requested Packet Rate (RPI) in Microseconds Target -&gt; Originator for Implicit-Messaging (Default 0x7A120 -&gt; 500ms)
+   </summary>
+      <value>The requested packet rate t o.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.O_T_OwnerRedundant">
+      <summary>
+   "1" Indicates that multiple connections are allowed Originator -&gt; Target for Implicit-Messaging (Default: TRUE)
+   </summary>
+      <value>
+        <c>true</c> if [o t owner redundant]; otherwise, <c>false</c>.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.T_O_OwnerRedundant">
+      <summary>
+   "1" Indicates that multiple connections are allowed Target -&gt; Originator for Implicit-Messaging (Default: TRUE)
+   </summary>
+      <value>
+        <c>true</c> if [t o owner redundant]; otherwise, <c>false</c>.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.O_T_VariableLength">
+      <summary>
+   With a fixed size connection, the amount of data shall be the size of specified in the "Connection Size" Parameter.
+   With a variable size, the amount of data could be up to the size specified in the "Connection Size" Parameter
+   Originator -&gt; Target for Implicit Messaging (Default: True (Variable length))
+   </summary>
+      <value>
+        <c>true</c> if [o t variable length]; otherwise, <c>false</c>.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.T_O_VariableLength">
+      <summary>
+   With a fixed size connection, the amount of data shall be the size of specified in the "Connection Size" Parameter.
+   With a variable size, the amount of data could be up to the size specified in the "Connection Size" Parameter
+   Target -&gt; Originator for Implicit Messaging (Default: True (Variable length))
+   </summary>
+      <value>
+        <c>true</c> if [t o variable length]; otherwise, <c>false</c>.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.O_T_Length">
+      <summary>
+   The maximum size in bytes (only pure data without sequence count and 32-Bit Real Time Header (if present)) from Originator -&gt; Target for Implicit Messaging (Default: 505)
+   </summary>
+      <value>The length of the o t.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.T_O_Length">
+      <summary>
+   The maximum size in bytes (only pure data woithout sequence count and 32-Bit Real Time Header (if present)) from Target -&gt; Originator for Implicit Messaging (Default: 505)
+   </summary>
+      <value>The length of the t o.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.O_T_ConnectionType">
+      <summary>
+   Connection Type Originator -&gt; Target for Implicit Messaging (Default: ConnectionType.Point_to_Point)
+   </summary>
+      <value>The type of the o t connection.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.T_O_ConnectionType">
+      <summary>
+   Connection Type Target -&gt; Originator for Implicit Messaging (Default: ConnectionType.Multicast)
+   </summary>
+      <value>The type of the t o connection.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.O_T_Priority">
+      <summary>
+   Priority Originator -&gt; Target for Implicit Messaging (Default: Priority.Scheduled)
+   Could be: Priority.Scheduled; Priority.High; Priority.Low; Priority.Urgent
+   </summary>
+      <value>The o t priority.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.T_O_Priority">
+      <summary>
+   Priority Target -&gt; Originator for Implicit Messaging (Default: Priority.Scheduled)
+   Could be: Priority.Scheduled; Priority.High; Priority.Low; Priority.Urgent
+   </summary>
+      <value>The t o priority.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.O_T_InstanceID">
+      <summary>
+   Class Assembly (Consuming IO-Path - Outputs) Originator -&gt; Target for Implicit Messaging (Default: 0x64)
+   </summary>
+      <value>The o t instance identifier.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.T_O_InstanceID">
+      <summary>
+   Class Assembly (Producing IO-Path - Inputs) Target -&gt; Originator for Implicit Messaging (Default: 0x64)
+   </summary>
+      <value>The t o instance identifier.</value>
+    </member>
+    <member name="F:Sres.Net.EEIP.EEIPClient.O_T_IOData">
+      <summary>
+   Provides Access to the Class 1 Real-Time IO-Data Originator -&gt; Target for Implicit Messaging
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.EEIPClient.T_O_IOData">
+      <summary>
+   Provides Access to the Class 1 Real-Time IO-Data Target -&gt; Originator for Implicit Messaging
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.O_T_RealTimeFormat">
+      <summary>
+   Used Real-Time Format Originator -&gt; Target for Implicit Messaging (Default: RealTimeFormat.Header32Bit)
+   Possible Values: RealTimeFormat.Header32Bit; RealTimeFormat.Heartbeat; RealTimeFormat.ZeroLength; RealTimeFormat.Modeless
+   </summary>
+      <value>The o t real time format.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.T_O_RealTimeFormat">
+      <summary>
+   Used Real-Time Format Target -&gt; Originator for Implicit Messaging (Default: RealTimeFormat.Modeless)
+   Possible Values: RealTimeFormat.Header32Bit; RealTimeFormat.Heartbeat; RealTimeFormat.ZeroLength; RealTimeFormat.Modeless
+   </summary>
+      <value>The t o real time format.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.AssemblyObjectClass">
+      <summary>
+   AssemblyObject for the Configuration Path in case of Implicit Messaging (Standard: 0x04)
+   </summary>
+      <value>The assembly object class.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.ConfigurationAssemblyInstanceID">
+      <summary>
+   ConfigurationAssemblyInstanceID is the InstanceID of the configuration Instance in the Assembly Object Class (Standard: 0x01)
+   </summary>
+      <value>The configuration assembly instance identifier.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.LastReceivedImplicitMessage">
+      <summary>
+   Returns the Date and Time when the last Implicit Message has been received fŕom The Target Device
+   Could be used to determine a Timeout
+   </summary>
+      <value>The last received implicit message.</value>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.#ctor">
+      <summary>
+   Initializes a new instance of the <see cref="T:Sres.Net.EEIP.EEIPClient" /> class.
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.EEIPClient.UdpState.e">
+      <summary>
+   The IP endpoint
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.EEIPClient.UdpState.u">
+      <summary>
+   The UDP client
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.ListIdentity">
+      <summary>
+   Lists the identity.
+   </summary>
+      <returns>List&lt;Encapsulation.CIPIdentityItem&gt;.</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.RegisterSession(UInt32,UInt16)">
+      <summary>
+   Sends a RegisterSession command to a target to initiate session
+   </summary>
+      <param name="address">IP-Address of the target device</param>
+      <param name="port">Port of the target device (default should be 0xAF12)</param>
+      <returns>Session Handle</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.UnRegisterSession">
+      <summary>
+   Sends a UnRegisterSession command to a target to terminate session
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.ForwardOpen">
+      <summary>
+   Forwards the open.
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.ForwardOpen(System.Boolean)">
+      <summary>
+        <font color="red">Badly formed XML comment.</font>
+      </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.LargeForwardOpen">
+      <summary>
+   Large forward open.
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.Detect_O_T_Length">
+      <summary>
+   Detects the Length of the data Originator -&gt; Target.
+   The Method uses an Explicit Message to detect the length.
+   The IP-Address, Port and the Instance ID has to be defined before
+   </summary>
+      <returns>System.UInt16.</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.Detect_T_O_Length">
+      <summary>
+   Detects the Length of the data Target -&gt; Originator.
+   The Method uses an Explicit Message to detect the length.
+   The IP-Address, Port and the Instance ID has to be defined before
+   </summary>
+      <returns>System.UInt16.</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.ForwardClose">
+      <summary>
+   Forward close.
+   </summary>
+      <exception cref="T:Sres.Net.EEIP.CIPException">
+      </exception>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.RegisterSession(System.String,UInt16)">
+      <summary>
+   Sends a RegisterSession command to a target to initiate session
+   </summary>
+      <param name="address">IP-Address of the target device</param>
+      <param name="port">Port of the target device (default should be 0xAF12)</param>
+      <returns>Session Handle</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.RegisterSession(System.String)">
+      <summary>
+   Sends a RegisterSession command to a target to initiate session with the Standard or predefined Port (Standard: 0xAF12)
+   </summary>
+      <param name="address">IP-Address of the target device</param>
+      <returns>Session Handle</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.RegisterSession">
+      <summary>
+   Sends a RegisterSession command to a target to initiate session with the Standard or predefined Port and Predefined IPAddress (Standard-Port: 0xAF12)
+   </summary>
+      <returns>Session Handle</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.GetAttributeSingle(System.Int32,System.Int32,System.Int32)">
+      <summary>
+   Gets the attribute single.
+   </summary>
+      <param name="classID">The class identifier.</param>
+      <param name="instanceID">The instance identifier.</param>
+      <param name="attributeID">The attribute identifier.</param>
+      <returns>System.Byte[].</returns>
+      <exception cref="T:Sres.Net.EEIP.CIPException">
+      </exception>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.GetAttributeAll(System.Int32,System.Int32)">
+      <summary>
+   Implementation of Common Service "Get_Attribute_All" - Service Code: 0x01
+   </summary>
+      <param name="classID">Class id of requested Attributes</param>
+      <param name="instanceID">Instance of Requested Attributes (0 for class Attributes)</param>
+      <returns>Session Handle</returns>
+      <exception cref="T:Sres.Net.EEIP.CIPException">
+      </exception>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.SetAttributeSingle(System.Int32,System.Int32,System.Int32,System.Byte[])">
+      <summary>
+   Sets the attribute single.
+   </summary>
+      <param name="classID">The class identifier.</param>
+      <param name="instanceID">The instance identifier.</param>
+      <param name="attributeID">The attribute identifier.</param>
+      <param name="value">The value.</param>
+      <returns>System.Byte[].</returns>
+      <exception cref="T:Sres.Net.EEIP.CIPException">
+      </exception>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.GetAttributeAll(System.Int32)">
+      <summary>
+   Implementation of Common Service "Get_Attribute_All" - Service Code: 0x01
+   </summary>
+      <param name="classID">Class id of requested Attributes</param>
+      <returns>System.Byte[].</returns>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.IdentityObject">
+      <summary>
+   Implementation of the identity Object (Class Code: 0x01) - Required Object according to CIP-Specification
+   </summary>
+      <value>The identity object.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.MessageRouterObject">
+      <summary>
+   Implementation of the Message Router Object (Class Code: 0x02) - Required Object according to CIP-Specification
+   </summary>
+      <value>The message router object.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.AssemblyObject">
+      <summary>
+   Implementation of the Assembly Object (Class Code: 0x04)
+   </summary>
+      <value>The assembly object.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.EEIPClient.TcpIpInterfaceObject">
+      <summary>
+   Implementation of the TCP/IP Object (Class Code: 0xF5) - Required Object according to CIP-Specification
+   </summary>
+      <value>The TCP ip interface object.</value>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.ToUshort(System.Byte[])">
+      <summary>
+   Converts a bytearray (received e.g. via getAttributeSingle) to ushort
+   </summary>
+      <param name="byteArray">bytearray to convert</param>
+      <returns>System.UInt16.</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.ToUint(System.Byte[])">
+      <summary>
+   Converts a bytearray (received e.g. via getAttributeSingle) to uint
+   </summary>
+      <param name="byteArray">bytearray to convert</param>
+      <returns>System.UInt32.</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.EEIPClient.ToBool(System.Byte,System.Int32)">
+      <summary>
+   Returns the "Bool" State of a byte Received via getAttributeSingle
+   </summary>
+      <param name="inputByte">byte to convert</param>
+      <param name="bitposition">bitposition to convert (First bit = bitposition 0)</param>
+      <returns>Converted bool value</returns>
+    </member>
+    <member name="F:Sres.Net.EEIP.ConnectionType.Null">
+      <summary>
+   The null
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.ConnectionType.Multicast">
+      <summary>
+   The multicast
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.ConnectionType.Point_to_Point">
+      <summary>
+   The point to point
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Priority.Low">
+      <summary>
+   The low
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Priority.High">
+      <summary>
+   The high
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Priority.Scheduled">
+      <summary>
+   The scheduled
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Priority.Urgent">
+      <summary>
+   The urgent
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.RealTimeFormat.Modeless">
+      <summary>
+   The modeless
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.RealTimeFormat.ZeroLength">
+      <summary>
+   The zero length
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.RealTimeFormat.Heartbeat">
+      <summary>
+   The heartbeat
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.RealTimeFormat.Header32Bit">
+      <summary>
+   The header32 bit
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.Encapsulation">
+      <summary>
+   Class Encapsulation.
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.Encapsulation.StatusEnum">
+      <summary>
+   Table 2-3.3 Error Codes
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.Encapsulation.CommandsEnum">
+      <summary>
+   Table 2-3.2 Encapsulation Commands
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.Encapsulation.CIPIdentityItem">
+      <summary>
+   Table 2-4.4 CIP Identity Item
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.Encapsulation.SocketAddress">
+      <summary>
+   Socket Address (see section 2-6.3.2)
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.Encapsulation.CommonPacketFormat">
+      <summary>
+   Class CommonPacketFormat.
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.Encapsulation.Command">
+      <summary>
+   Gets or sets the command.
+   </summary>
+      <value>The command.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.Encapsulation.Length">
+      <summary>
+   Gets or sets the length.
+   </summary>
+      <value>The length.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.Encapsulation.SessionHandle">
+      <summary>
+   Gets or sets the session handle.
+   </summary>
+      <value>The session handle.</value>
+    </member>
+    <member name="P:Sres.Net.EEIP.Encapsulation.Status">
+      <summary>
+   Gets the status.
+   </summary>
+      <value>The status.</value>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandSpecificData">
+      <summary>
+   The command specific data
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.StatusEnum.Success">
+      <summary>
+   The success
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.StatusEnum.InvalidCommand">
+      <summary>
+   The invalid command
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.StatusEnum.InsufficientMemory">
+      <summary>
+   The insufficient memory
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.StatusEnum.IncorrectData">
+      <summary>
+   The incorrect data
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.StatusEnum.InvalidSessionHandle">
+      <summary>
+   The invalid session handle
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.StatusEnum.InvalidLength">
+      <summary>
+   The invalid length
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.StatusEnum.UnsupportedEncapsulationProtocol">
+      <summary>
+   The unsupported encapsulation protocol
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.NOP">
+      <summary>
+   The nop
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.ListServices">
+      <summary>
+   The list services
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.ListIdentity">
+      <summary>
+   The list identity
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.ListInterfaces">
+      <summary>
+   The list interfaces
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.RegisterSession">
+      <summary>
+   The register session
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.UnRegisterSession">
+      <summary>
+   The un register session
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.SendRRData">
+      <summary>
+   The send rr data
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.SendUnitData">
+      <summary>
+   The send unit data
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.IndicateStatus">
+      <summary>
+   The indicate status
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommandsEnum.Cancel">
+      <summary>
+   The cancel
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.Encapsulation.toBytes">
+      <summary>
+   To the bytes.
+   </summary>
+      <returns>System.Byte[].</returns>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.ItemTypeCode">
+      <summary>
+   The item type code
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.ItemLength">
+      <summary>
+   The item length
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.EncapsulationProtocolVersion">
+      <summary>
+   The encapsulation protocol version
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.SocketAddress">
+      <summary>
+   The socket address
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.VendorID1">
+      <summary>
+   The vendor i d1
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.DeviceType1">
+      <summary>
+   The device type1
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.ProductCode1">
+      <summary>
+   The product code1
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.Revision1">
+      <summary>
+   The revision1
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.Status1">
+      <summary>
+   The status1
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.SerialNumber1">
+      <summary>
+   The serial number1
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.ProductNameLength">
+      <summary>
+   The product name length
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.ProductName1">
+      <summary>
+   The product name1
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.State1">
+      <summary>
+   The state1
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.getCIPIdentityItem(System.Int32,System.Byte[])">
+      <summary>
+   Gets the cip identity item.
+   </summary>
+      <param name="startingByte">The starting byte.</param>
+      <param name="receivedData">The received data.</param>
+      <returns>CIPIdentityItem.</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.Encapsulation.CIPIdentityItem.getIPAddress(UInt32)">
+      <summary>
+   Converts an IP-Address in UIint32 Format (Received by Device)
+   </summary>
+      <param name="address">The address.</param>
+      <returns>System.String.</returns>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.SocketAddress.SIN_family">
+      <summary>
+   The sin family
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.SocketAddress.SIN_port">
+      <summary>
+   The sin port
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.SocketAddress.SIN_Address">
+      <summary>
+   The sin address
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.SocketAddress.SIN_Zero">
+      <summary>
+   The sin zero
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.ItemCount">
+      <summary>
+   The item count
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.AddressItem">
+      <summary>
+   The address item
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.AddressLength">
+      <summary>
+   The address length
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.DataItem">
+      <summary>
+   The data item
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.DataLength">
+      <summary>
+   The data length
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.Data">
+      <summary>
+   The data
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.SockaddrInfoItem_O_T">
+      <summary>
+   The sockaddr information item o t
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.SockaddrInfoLength">
+      <summary>
+   The sockaddr information length
+   </summary>
+    </member>
+    <member name="F:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.SocketaddrInfo_O_T">
+      <summary>
+   The socketaddr information o t
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.Encapsulation.CommonPacketFormat.toBytes">
+      <summary>
+   To the bytes.
+   </summary>
+      <returns>System.Byte[].</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.ObjectLibrary.AssemblyObject.#ctor(EEIPClient)">
+      <summary>
+   Constructor. </summary>
+      <param name="eeipClient"> EEIPClient Object</param>
+    </member>
+    <member name="M:Sres.Net.EEIP.ObjectLibrary.AssemblyObject.getInstance(System.Int32)">
+      <summary>
+   Reads the Instance of the Assembly Object (Instance 101 returns the bytes of the class ID 101)
+   </summary>
+      <param name="instanceNo"> Instance number to be returned</param>
+      <returns>bytes of the Instance</returns>
+    </member>
+    <member name="M:Sres.Net.EEIP.ObjectLibrary.AssemblyObject.setInstance(System.Int32,System.Byte[])">
+      <summary>
+   Sets an Instance of the Assembly Object
+   </summary>
+      <param name="instanceNo"> Instance number to be returned</param>
+      <returns>bytes of the Instance</returns>
+    </member>
+    <member name="T:Sres.Net.EEIP.ObjectLibrary.ConnectionManagerObject">
+      <summary>
+   Connection Manager Object - Class Code: 06 Hex
+   </summary>
+      <remarks>
+      </remarks>
+    </member>
+    <member name="M:Sres.Net.EEIP.ObjectLibrary.ConnectionManagerObject.GetExtendedStatus(System.UInt32)">
+      <summary>
+   Returns the Explanation of a given statuscode (Table 3-5-29) Page 3-75 Vol 1
+   </summary>
+      <param name="statusCode">Extended Status Code</param>
+    </member>
+    <member name="T:Sres.Net.EEIP.ObjectLibrary.IdentityObject">
+      <summary>
+   Identity Object - Class Code: 01 Hex
+   </summary>
+      <remarks>
+   This object provides identification of and general information about the device. The Identity Object shall be present in all CIP products.
+   If autonomous components of a device exist, use multiple instances of the Identity Object.
+   </remarks>
+    </member>
+    <member name="M:Sres.Net.EEIP.ObjectLibrary.IdentityObject.#ctor(EEIPClient)">
+      <summary>
+   Constructor. </summary>
+      <param name="eeipClient"> EEIPClient Object</param>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.VendorID">
+      <summary>
+   gets the Vendor ID / Read "Identity Object" Class Code 0x01 - Attribute ID 1
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.DeviceType">
+      <summary>
+   gets the Device Type / Read "Identity Object" Class Code 0x01 - Attribute ID 2
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.ProductCode">
+      <summary>
+   gets the Product code / Read "Identity Object" Class Code 0x01 - Attribute ID 3
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.Revision">
+      <summary>
+   gets the Revision / Read "Identity Object" Class Code 0x01 - Attribute ID 4
+   </summary>
+      <returns>Revision</returns>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.Status">
+      <summary>
+   gets the Status / Read "Identity Object" Class Code 0x01 - Attribute ID 5
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.SerialNumber">
+      <summary>
+   gets the Serial number / Read "Identity Object" Class Code 0x01 - Attribute ID 6
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.ProductName">
+      <summary>
+   gets the Product Name / Read "Identity Object" Class Code 0x01 - Attribute ID 7
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.State">
+      <summary>
+   gets the State / Read "Identity Object" Class Code 0x01 - Attribute ID 8
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.ConfigurationConsistencyValue">
+      <summary>
+   gets the State / Read "Identity Object" Class Code 0x01 - Attribute ID 9
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.HeartbeatInterval">
+      <summary>
+   gets the Heartbeat intervall / Read "Identity Object" Class Code 0x01 - Attribute ID 10
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.SupportedLanguageList">
+      <summary>
+   gets the Supported Language List / Read "Identity Object" Class Code 0x01 - Attribute ID 12
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.ClassAttributes">
+      <summary>
+   gets all class attributes
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.IdentityObject.InstanceAttributes">
+      <summary>
+   gets all instance attributes
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.ObjectLibrary.MessageRouterObject.#ctor(EEIPClient)">
+      <summary>
+   Constructor. </summary>
+      <param name="eeipClient"> EEIPClient Object</param>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.MessageRouterObject.ObjectList">
+      <summary>
+   gets the Object List / Read "Message Router Object" Class Code 0x02 - Attribute ID 1
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.MessageRouterObject.NumberAvailable">
+      <summary>
+   gets the Maximum of connections supported / Read "Message Router Object" Class Code 0x02 - Attribute ID 2
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.MessageRouterObject.NumberActive">
+      <summary>
+   gets the number of active connections / Read "Message Router Object" Class Code 0x02 - Attribute ID 3
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.MessageRouterObject.ActiveConnections">
+      <summary>
+   gets the active connections / Read "Message Router Object" Class Code 0x02 - Attribute ID 4
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.ObjectLibrary.InterfaceStatus">
+      <summary>
+   Chapter 5-3.2.2.1 Volume 2
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.ObjectLibrary.InterfaceCapabilityFlags">
+      <summary>
+   Chapter 5-3.2.2.2 Volume 2
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.ObjectLibrary.InterfaceControlFlags">
+      <summary>
+   Chapter 5-3.2.2.3 Volume 2
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.ObjectLibrary.PhysicalLink">
+      <summary>
+   Page 5.5 Volume 2
+   </summary>
+    </member>
+    <member name="T:Sres.Net.EEIP.ObjectLibrary.NetworkInterfaceConfiguration">
+      <summary>
+   Chapter 5-3.2.2.5 Volume 2
+   </summary>
+    </member>
+    <member name="M:Sres.Net.EEIP.ObjectLibrary.TcpIpInterfaceObject.#ctor(EEIPClient)">
+      <summary>
+   Constructor. </summary>
+      <param name="eeipClient"> EEIPClient Object</param>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.TcpIpInterfaceObject.Status">
+      <summary>
+   gets the Status / Read "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 1
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.TcpIpInterfaceObject.ConfigurationCapability">
+      <summary>
+   gets the Configuration capability / Read "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 2
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.TcpIpInterfaceObject.PhysicalLinkObject">
+      <summary>
+   gets the Path to the Physical Link object / Read "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 4
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.TcpIpInterfaceObject.ConfigurationControl">
+      <summary>
+   sets the Configuration control attribute / Write "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 3
+   </summary>
+    </member>
+    <member name="P:Sres.Net.EEIP.ObjectLibrary.TcpIpInterfaceObject.InterfaceConfiguration">
+      <summary>
+   sets the TCP/IP Network interface Configuration / Write "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 5
+   </summary>
+    </member>
+    <member name="T:ConsoleApplication1.Program">
+      <summary>
+   Class Program.
+   </summary>
+    </member>
+  </members>
+</doc>
