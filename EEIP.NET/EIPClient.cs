@@ -243,9 +243,10 @@ namespace Sres.Net.EEIP
             }
             stream = client.GetStream();
 
-            stream.Write(encapsulation.SerializeToBytes(), 0, encapsulation.SerializeToBytes().Length);
-            var data = new byte[256];
+            byte[] encapData = encapsulation.SerializeToBytes();
+            stream.Write(encapData, 0, encapData.Length);
 
+            var data = new byte[256];
             var bytes = stream.Read(data, 0, data.Length);
 
             var returnvalue = data[4] + ((uint)data[5] << 8) + ((uint)data[6] << 16) + ((uint)data[7] << 24);
@@ -265,8 +266,9 @@ namespace Sres.Net.EEIP
                 SessionHandle = sessionHandle,
             };
 
-            stream.Write(encapsulation.SerializeToBytes(), 0, encapsulation.SerializeToBytes().Length);
-            var data = new byte[256];
+            byte[] encapData = encapsulation.SerializeToBytes();
+            stream.Write(encapData, 0, encapData.Length);
+
             ((IDisposable)client).Dispose();
             client = null;
             stream.Dispose();
@@ -750,14 +752,15 @@ namespace Sres.Net.EEIP
                 commonPacketFormat.Data.Add(T_O_InstanceID);
             }
 
-            var dataToWrite = new byte[encapsulation.SerializeToBytes().Length + commonPacketFormat.SerializeToBytes().Length];
-            Buffer.BlockCopy(encapsulation.SerializeToBytes(), 0, dataToWrite, 0, encapsulation.SerializeToBytes().Length);
-            Buffer.BlockCopy(commonPacketFormat.SerializeToBytes(), 0, dataToWrite, encapsulation.SerializeToBytes().Length, commonPacketFormat.SerializeToBytes().Length);
-            encapsulation.SerializeToBytes();
+            byte[] encapData = encapsulation.SerializeToBytes();
+            byte[] packetData = commonPacketFormat.SerializeToBytes();
+            var dataToWrite = new byte[encapData.Length + packetData.Length];
+            Buffer.BlockCopy(encapData, 0, dataToWrite, 0, encapData.Length);
+            Buffer.BlockCopy(packetData, 0, dataToWrite, encapData.Length, packetData.Length);
 
             stream.Write(dataToWrite, 0, dataToWrite.Length);
-            var data = new byte[564];
 
+            var data = new byte[564];
             var bytes = stream.Read(data, 0, data.Length);
 
             //--------------------------BEGIN Error?
@@ -992,14 +995,15 @@ namespace Sres.Net.EEIP
             for (var i = 0; i < requestedPath.Length; i++)
                 commonPacketFormat.Data.Add(requestedPath[i]);
 
-            var dataToWrite = new byte[encapsulation.SerializeToBytes().Length + commonPacketFormat.SerializeToBytes().Length];
-            Buffer.BlockCopy(encapsulation.SerializeToBytes(), 0, dataToWrite, 0, encapsulation.SerializeToBytes().Length);
-            Buffer.BlockCopy(commonPacketFormat.SerializeToBytes(), 0, dataToWrite, encapsulation.SerializeToBytes().Length, commonPacketFormat.SerializeToBytes().Length);
-            encapsulation.SerializeToBytes();
+            byte[] encapData = encapsulation.SerializeToBytes();
+            byte[] packetData = commonPacketFormat.SerializeToBytes();
+            var dataToWrite = new byte[encapData.Length + packetData.Length];
+            Buffer.BlockCopy(encapData, 0, dataToWrite, 0, encapData.Length);
+            Buffer.BlockCopy(packetData, 0, dataToWrite, encapData.Length, packetData.Length);
 
             stream.Write(dataToWrite, 0, dataToWrite.Length);
-            var data = new byte[564];
 
+            var data = new byte[564];
             var bytes = stream.Read(data, 0, data.Length);
 
             //--------------------------BEGIN Error?
@@ -1069,14 +1073,16 @@ namespace Sres.Net.EEIP
             for (var i = 0; i < requestedPath.Length; i++)
                 commonPacketFormat.Data.Add(requestedPath[i]);
 
-            var dataToWrite = new byte[encapsulation.SerializeToBytes().Length + commonPacketFormat.SerializeToBytes().Length];
-            Buffer.BlockCopy(encapsulation.SerializeToBytes(), 0, dataToWrite, 0, encapsulation.SerializeToBytes().Length);
-            Buffer.BlockCopy(commonPacketFormat.SerializeToBytes(), 0, dataToWrite, encapsulation.SerializeToBytes().Length, commonPacketFormat.SerializeToBytes().Length);
+            byte[] encapData = encapsulation.SerializeToBytes();
+            byte[] packetData = commonPacketFormat.SerializeToBytes();
+            var dataToWrite = new byte[encapData.Length + packetData.Length];
+            Buffer.BlockCopy(encapData, 0, dataToWrite, 0, encapData.Length);
+            Buffer.BlockCopy(packetData, 0, dataToWrite, encapData.Length, packetData.Length);
            
 
             stream.Write(dataToWrite, 0, dataToWrite.Length);
-            var data = new byte[564];
 
+            var data = new byte[564];
             var bytes = stream.Read(data, 0, data.Length);
             //--------------------------BEGIN Error?
             if (data[42] != 0)      //Exception codes see "Table B-1.1 CIP General Status Codes"
@@ -1147,14 +1153,15 @@ namespace Sres.Net.EEIP
                 commonPacketFormat.Data.Add(value[i]);
             //----------------Data
 
-            var dataToWrite = new byte[encapsulation.SerializeToBytes().Length + commonPacketFormat.SerializeToBytes().Length];
-            Buffer.BlockCopy(encapsulation.SerializeToBytes(), 0, dataToWrite, 0, encapsulation.SerializeToBytes().Length);
-            Buffer.BlockCopy(commonPacketFormat.SerializeToBytes(), 0, dataToWrite, encapsulation.SerializeToBytes().Length, commonPacketFormat.SerializeToBytes().Length);
-            encapsulation.SerializeToBytes();
+            byte[] encapData = encapsulation.SerializeToBytes();
+            byte[] packetData = commonPacketFormat.SerializeToBytes();
+            var dataToWrite = new byte[encapData.Length + packetData.Length];
+            Buffer.BlockCopy(encapData, 0, dataToWrite, 0, encapData.Length);
+            Buffer.BlockCopy(packetData, 0, dataToWrite, encapData.Length, packetData.Length);
 
             stream.Write(dataToWrite, 0, dataToWrite.Length);
-            var data = new byte[564];
 
+            var data = new byte[564];
             var bytes = stream.Read(data, 0, data.Length);
 
             //--------------------------BEGIN Error?
