@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -267,7 +268,14 @@ namespace Sres.Net.EEIP
             };
 
             byte[] encapData = encapsulation.SerializeToBytes();
-            stream.Write(encapData, 0, encapData.Length);
+            try
+            {
+                stream.Write(encapData, 0, encapData.Length);
+            }
+            catch (IOException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+            }
 
             ((IDisposable)client).Dispose();
             client = null;
