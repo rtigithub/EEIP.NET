@@ -8,6 +8,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Sres.Net.EEIP.ObjectLibrary;
 
 namespace Sres.Net.EEIP
@@ -172,7 +173,7 @@ namespace Sres.Net.EEIP
         /// List and identify potential targets. This command shall be sent as broadcast massage using UDP.
         /// </summary>
         /// <returns><see cref="Encapsulation.CIPIdentityItem"/> contains the received informations from all devices </returns>	
-        public List<Encapsulation.CIPIdentityItem> ListIdentity()
+        public async Task<List<Encapsulation.CIPIdentityItem>> ListIdentityAsync()
         {
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
             {
@@ -191,13 +192,13 @@ namespace Sres.Net.EEIP
                             sendData[0] = 0x63; //Command for "ListIdentity"
                             var udpClient = new UdpClient();
                             var endPoint = new IPEndPoint(System.Net.IPAddress.Parse(multicastAddress), 44818);
-                            udpClient.Send(sendData, sendData.Length, endPoint);
+                            await udpClient.SendAsync(sendData, sendData.Length, endPoint);
 
                             var s = new UdpState {e = endPoint, u = udpClient};
 
                             var asyncResult = udpClient.BeginReceive(ReceiveIdentityCallback, s);
 
-                            Thread.Sleep(1000);
+                            await Task.Delay(1000);
                         }
                     }
                 }
@@ -212,7 +213,7 @@ namespace Sres.Net.EEIP
         /// <param name="address">IP-Address of the target device</param> 
         /// <param name="port">Port of the target device (default should be 0xAF12)</param> 
         /// <returns>Session Handle</returns>	
-        public uint RegisterSession(IPAddress address, ushort port)
+        public async Task<uint> RegisterSessionAsync(IPAddress address, ushort port)
         {
             if (sessionHandle != 0)
                 return sessionHandle;
@@ -226,7 +227,7 @@ namespace Sres.Net.EEIP
             client = new TcpClient(AddressFamily.InterNetwork);
             try
             {
-                client.Connect(address, port);
+                await client.ConnectAsync(address, port);
             }
             catch (Exception ex)
             {
@@ -245,10 +246,10 @@ namespace Sres.Net.EEIP
             stream = client.GetStream();
 
             byte[] encapData = encapsulation.SerializeToBytes();
-            stream.Write(encapData, 0, encapData.Length);
+            await stream.WriteAsync(encapData, 0, encapData.Length);
 
             var data = new byte[256];
-            var bytes = stream.Read(data, 0, data.Length);
+            var bytes = await stream.ReadAsync(data, 0, data.Length);
 
             var returnvalue = data[4] + ((uint)data[5] << 8) + ((uint)data[6] << 16) + ((uint)data[7] << 24);
             sessionHandle = returnvalue;
@@ -258,7 +259,7 @@ namespace Sres.Net.EEIP
         /// <summary>
         /// Sends a UnRegisterSession command to a target to terminate session
         /// </summary> 
-        public void UnRegisterSession()
+        public async Task UnRegisterSessionAsync()
         {
             var encapsulation = new Encapsulation
             {
@@ -270,7 +271,7 @@ namespace Sres.Net.EEIP
             byte[] encapData = encapsulation.SerializeToBytes();
             try
             {
-                stream.Write(encapData, 0, encapData.Length);
+                await stream.WriteAsync(encapData, 0, encapData.Length);
             }
             catch (IOException ex)
             {
@@ -284,15 +285,15 @@ namespace Sres.Net.EEIP
             sessionHandle = 0;
         }
 
-        public void ForwardOpen()
+        public Task ForwardOpenAsync()
         {
-            ForwardOpen(false);
+            return ForwardOpenAsync(false);
         }
 
         private UdpClient udpClientReceive;
         private bool udpClientReceiveClosed;
 
-        public void ForwardOpen(bool largeForwardOpen)
+        public async Task ForwardOpenAsync(bool largeForwardOpen)
         {
             if (sessionHandle == 0) //If a Session is not Registered, Try to Registers a Session with the predefined IP-Address and Port
                 throw new InvalidOperationException("Register session first.");
@@ -517,10 +518,10 @@ namespace Sres.Net.EEIP
             Buffer.BlockCopy(encapsulationBytes, 0, dataToWrite, 0, encapsulationBytes.Length);
             Buffer.BlockCopy(commonPacketBytes, 0, dataToWrite, encapsulationBytes.Length, commonPacketBytes.Length);
             
-            stream.Write(dataToWrite, 0, dataToWrite.Length);
+            await stream.WriteAsync(dataToWrite, 0, dataToWrite.Length);
             var data = new byte[564];
 
-            var bytes = stream.Read(data, 0, data.Length);
+            var bytes = await stream.ReadAsync(data, 0, data.Length);
 
             //--------------------------BEGIN Error?
             if (data[42] != 0)      //Exception codes see "Table B-1.1 CIP General Status Codes"
@@ -566,15 +567,15 @@ namespace Sres.Net.EEIP
                 udpClientReceive.JoinMulticastGroup(multicast);
             }
 
-            var sendThread = new Thread(sendUDP);
+            var sendThread = new Thread(SendUdpThread);
             sendThread.Start();
 
             var asyncResult = udpClientReceive.BeginReceive(ReceiveCallbackClass1, s);
         }
 
-        public void LargeForwardOpen()
+        public Task LargeForwardOpenAsync()
         {
-            ForwardOpen(true);
+            return ForwardOpenAsync(true);
         }
 
         private ushort o_t_detectedLength;
@@ -583,13 +584,14 @@ namespace Sres.Net.EEIP
         /// The Method uses an Explicit Message to detect the length.
         /// The IP-Address, Port and the Instance ID has to be defined before
         /// </summary>
-        public ushort Detect_O_T_Length ()
+        public async Task<ushort> Detect_O_T_Length ()
         {
             if (o_t_detectedLength == 0)
             {
                 if (sessionHandle == 0)
                     throw new InvalidOperationException("Register session first.");
-                o_t_detectedLength = (ushort)GetAttributeSingle(0x04, O_T_InstanceID, 3).Length;
+                var data = await GetAttributeSingleAsync(0x04, O_T_InstanceID, 3);
+                o_t_detectedLength = (ushort)data.Length;
                 return o_t_detectedLength;
             }
             return o_t_detectedLength;
@@ -602,13 +604,14 @@ namespace Sres.Net.EEIP
         /// The Method uses an Explicit Message to detect the length.
         /// The IP-Address, Port and the Instance ID has to be defined before
         /// </summary>
-        public ushort Detect_T_O_Length()
+        public async Task<ushort> Detect_T_O_LengthAsync()
         {
             if (t_o_detectedLength == 0)
             {
                 if (sessionHandle == 0)
                     throw new InvalidOperationException("Register session first.");
-                t_o_detectedLength = (ushort)GetAttributeSingle(0x04, T_O_InstanceID, 3).Length;
+                var data = await GetAttributeSingleAsync(0x04, T_O_InstanceID, 3);
+                t_o_detectedLength = (ushort)data.Length;
                 return t_o_detectedLength;
             }
             return t_o_detectedLength;
@@ -657,11 +660,11 @@ namespace Sres.Net.EEIP
             return b1 << 24 | b2 << 16 | b3 << 8 | b4;
         } 
 
-        public void ForwardClose()
+        public async Task ForwardCloseAsync()
         {
             //First stop the Thread which send data
 
-            stopUDP = true;
+            this.stopUdpThread = true;
 
             var lengthOffset = 5 + (O_T_ConnectionType == ConnectionType.Null ? 0 : 2) + (T_O_ConnectionType == ConnectionType.Null ? 0 : 2);
 
@@ -766,10 +769,10 @@ namespace Sres.Net.EEIP
             Buffer.BlockCopy(encapData, 0, dataToWrite, 0, encapData.Length);
             Buffer.BlockCopy(packetData, 0, dataToWrite, encapData.Length, packetData.Length);
 
-            stream.Write(dataToWrite, 0, dataToWrite.Length);
+            await stream.WriteAsync(dataToWrite, 0, dataToWrite.Length);
 
             var data = new byte[564];
-            var bytes = stream.Read(data, 0, data.Length);
+            var bytes = await stream.ReadAsync(data, 0, data.Length);
 
             //--------------------------BEGIN Error?
             if (data[42] != 0)      //Exception codes see "Table B-1.1 CIP General Status Codes"
@@ -781,16 +784,16 @@ namespace Sres.Net.EEIP
             udpClientReceive.Close();
         }
 
-        private bool stopUDP;
+        private bool stopUdpThread;
         private int sequence;
-        private void sendUDP()
+        private void SendUdpThread()
         {
             var udpClientsend = new UdpClient();
-            stopUDP = false;
+            this.stopUdpThread = false;
             uint sequenceCount = 0;
 
 
-            while (!stopUDP)
+            while (!this.stopUdpThread)
             {
                 var o_t_IOData = new byte[564];
                 var endPointsend = new IPEndPoint(targetIpAddress, TargetUDPPort);
@@ -920,7 +923,7 @@ namespace Sres.Net.EEIP
         /// </summary>
         /// <param name="address">IP-Address of the target device</param> 
         /// <returns>Session Handle</returns>	
-        public uint RegisterSession(Uri address)
+        public Task<uint> RegisterSessionAsync(Uri address)
         {
             if (!address.IsAbsoluteUri)
             {
@@ -948,10 +951,10 @@ namespace Sres.Net.EEIP
             var ipAddress = Dns.GetHostAddresses(address.Host)
                 .First(x => x.AddressFamily == AddressFamily.InterNetwork);
 
-            return RegisterSession(ipAddress, port);
+            return RegisterSessionAsync(ipAddress, port);
         }
 
-        public byte[] GetAttributeSingle(int classID, int instanceID, int attributeID)
+        public async Task<byte[]> GetAttributeSingleAsync(int classID, int instanceID, int attributeID)
         {
             var requestedPath = GetEPath(classID, instanceID, attributeID);
             if (sessionHandle == 0)             //If a Session is not Registers, Try to Registers a Session with the predefined IP-Address and Port
@@ -1011,10 +1014,10 @@ namespace Sres.Net.EEIP
             Buffer.BlockCopy(encapData, 0, dataToWrite, 0, encapData.Length);
             Buffer.BlockCopy(packetData, 0, dataToWrite, encapData.Length, packetData.Length);
 
-            stream.Write(dataToWrite, 0, dataToWrite.Length);
+            await stream.WriteAsync(dataToWrite, 0, dataToWrite.Length);
 
             var data = new byte[564];
-            var bytes = stream.Read(data, 0, data.Length);
+            var bytes = await stream.ReadAsync(data, 0, data.Length);
 
             //--------------------------BEGIN Error?
             if (data[42] != 0)      //Exception codes see "Table B-1.1 CIP General Status Codes"
@@ -1033,7 +1036,7 @@ namespace Sres.Net.EEIP
         /// <param name="classID">Class id of requested Attributes</param> 
         /// <param name="instanceID">Instance of Requested Attributes (0 for class Attributes)</param> 
         /// <returns>Session Handle</returns>	
-        public byte[] GetAttributeAll(int classID, int instanceID)
+        public async Task<byte[]> GetAttributeAllAsync(int classID, int instanceID)
         {
             var requestedPath = GetEPath(classID, instanceID, 0);
             if (sessionHandle == 0)             //If a Session is not Registered, Try to Registers a Session with the predefined IP-Address and Port
@@ -1090,10 +1093,10 @@ namespace Sres.Net.EEIP
             Buffer.BlockCopy(packetData, 0, dataToWrite, encapData.Length, packetData.Length);
            
 
-            stream.Write(dataToWrite, 0, dataToWrite.Length);
+            await stream.WriteAsync(dataToWrite, 0, dataToWrite.Length);
 
             var data = new byte[564];
-            var bytes = stream.Read(data, 0, data.Length);
+            var bytes = await stream.ReadAsync(data, 0, data.Length);
             //--------------------------BEGIN Error?
             if (data[42] != 0)      //Exception codes see "Table B-1.1 CIP General Status Codes"
                 throw new CIPException(GeneralStatusCodes.GetStatusCode(data[42]));
@@ -1105,7 +1108,7 @@ namespace Sres.Net.EEIP
             return returnData;
         }
 
-        public byte[] SetAttributeSingle(int classID, int instanceID, int attributeID, byte[] value)
+        public async Task<byte[]> SetAttributeSingleAsync(int classID, int instanceID, int attributeID, byte[] value)
         {
             var requestedPath = GetEPath(classID, instanceID, attributeID);
             if (sessionHandle == 0)             //If a Session is not Registers, Try to Registers a Session with the predefined IP-Address and Port
@@ -1169,10 +1172,10 @@ namespace Sres.Net.EEIP
             Buffer.BlockCopy(encapData, 0, dataToWrite, 0, encapData.Length);
             Buffer.BlockCopy(packetData, 0, dataToWrite, encapData.Length, packetData.Length);
 
-            stream.Write(dataToWrite, 0, dataToWrite.Length);
+            await stream.WriteAsync(dataToWrite, 0, dataToWrite.Length);
 
             var data = new byte[564];
-            var bytes = stream.Read(data, 0, data.Length);
+            var bytes = await stream.ReadAsync(data, 0, data.Length);
 
             //--------------------------BEGIN Error?
             if (data[42] != 0)      //Exception codes see "Table B-1.1 CIP General Status Codes"
@@ -1267,9 +1270,9 @@ namespace Sres.Net.EEIP
         /// Implementation of Common Service "Get_Attribute_All" - Service Code: 0x01
         /// </summary>
         /// <param name="classID">Class id of requested Attributes</param> 
-        public byte[] GetAttributeAll(int classID)
+        public Task<byte[]> GetAttributeAllAsync(int classID)
         {
-            return GetAttributeAll(classID, 0);
+            return GetAttributeAllAsync(classID, 0);
         }
 
         private IdentityObject identityObject;

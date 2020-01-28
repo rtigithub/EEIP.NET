@@ -14,12 +14,14 @@ namespace Keyence_NU_RP1_Implicit
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+
+        static async Task MainAsync(string[] args)
         {
             EEIPClient eeipClient = new EEIPClient();
             //Ip-Address of the Ethernet-IP Device (In this case Keyence-NU-EP1)
             //A Session has to be registered before any communication can be established
-            eeipClient.RegisterSession(new Uri("tcp://192.168.0.123"));
+            await eeipClient.RegisterSessionAsync(new Uri("tcp://192.168.0.123"));
 
             //Parameters from Originator -> Target
             eeipClient.O_T_InstanceID = 0xfe;              //Instance ID of the Output Assembly
@@ -44,7 +46,7 @@ namespace Keyence_NU_RP1_Implicit
             eeipClient.RequestedPacketRate_T_O = 500000;    //RPI in  500ms is the Standard value
 
             //Forward open initiates the Implicit Messaging
-            eeipClient.ForwardOpen();
+            await eeipClient.ForwardOpenAsync();
 
             while (true)
             {
@@ -58,8 +60,8 @@ namespace Keyence_NU_RP1_Implicit
             }
 
             //Close the Session
-            eeipClient.ForwardClose();
-            eeipClient.UnRegisterSession();
+            await eeipClient.ForwardCloseAsync();
+            await eeipClient.UnRegisterSessionAsync();
         }
     }
 }
