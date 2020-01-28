@@ -906,7 +906,9 @@ namespace Sres.Net.EEIP
                         Array.Copy(receiveBytes, 20 + headerOffset, _T_O_IOData, 0,
                             receiveBytes.Length - 20 - headerOffset);
                     }
+
                     //Console.WriteLine(T_O_IOData[0]);
+                    OnImplicitMessageReceived(new ImplicitMessageReceivedArgs(connectionID));
                 }
             }
             LastReceivedImplicitMessage = DateTime.Now;
@@ -1368,6 +1370,13 @@ namespace Sres.Net.EEIP
             }
         }
 
+        public event EventHandler<ImplicitMessageReceivedArgs> ImplicitMessageReceived;
+
+        protected virtual void OnImplicitMessageReceived(ImplicitMessageReceivedArgs e)
+        {
+            ImplicitMessageReceived?.Invoke(this, e);
+        }
+
         /// <summary>
         /// Converts a bytearray (received e.g. via getAttributeSingle) to ushort
         /// </summary>
@@ -1399,6 +1408,7 @@ namespace Sres.Net.EEIP
            
             return ((inputByte>>bitposition)&0x01) != 0 ? true : false;
         }
+
         public void Dispose()
         {
             ((IDisposable)this.client)?.Dispose();
