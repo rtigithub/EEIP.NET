@@ -145,20 +145,33 @@ namespace Sres.Net.EEIP
         {
             var udpState = (UdpState)ar.AsyncState;
 
-            var receiveBytes = udpState.u.EndReceive(ar, ref udpState.e);
-            var receiveString = Encoding.ASCII.GetString(receiveBytes);
-
-            // EndReceive worked and we have received data and remote endpoint
-            if (receiveBytes.Length > 0)
+            try
             {
-                var command = Convert.ToUInt16(receiveBytes[0]
-                                               | (receiveBytes[1] << 8));
-                if (command == 0x63)
+                var receiveBytes = udpState.u.EndReceive(ar, ref udpState.e);
+                var receiveString = Encoding.ASCII.GetString(receiveBytes);
+
+                // EndReceive worked and we have received data and remote endpoint
+                if (receiveBytes.Length > 0)
                 {
-                    receivedCipIdentities.TryAdd(Encapsulation.CIPIdentityItem.Deserialize(24, receiveBytes), 0);
+                    var command = Convert.ToUInt16(receiveBytes[0]
+                                                   | (receiveBytes[1] << 8));
+                    if (command == 0x63)
+                    {
+                        receivedCipIdentities.TryAdd(Encapsulation.CIPIdentityItem.Deserialize(24, receiveBytes), 0);
+                    }
                 }
+                var asyncResult = udpState.u.BeginReceive(ReceiveIdentityCallback, (UdpState)ar.AsyncState);
             }
-            var asyncResult = udpState.u.BeginReceive(ReceiveIdentityCallback, (UdpState)ar.AsyncState);
+            catch (Exception ex)
+            {
+                if (ex is ObjectDisposedException || ex is SocketException)
+                {
+                    // TODO: Log it as a trace here
+                    return;
+                }
+                // Wasn't an exception we were looking for so rethrow it.
+                throw;
+            }
         }
 
         public class UdpState
@@ -277,12 +290,14 @@ namespace Sres.Net.EEIP
             {
                 Console.Error.WriteLine(ex.Message);
             }
-
-            ((IDisposable)client).Dispose();
-            client = null;
-            stream.Dispose();
-            stream = null;
-            sessionHandle = 0;
+            finally
+            {
+                ((IDisposable)client)?.Dispose();
+                client = null;
+                stream?.Dispose();
+                stream = null;
+                sessionHandle = 0;
+            }
         }
 
         public Task ForwardOpenAsync()
@@ -769,19 +784,23 @@ namespace Sres.Net.EEIP
             Buffer.BlockCopy(encapData, 0, dataToWrite, 0, encapData.Length);
             Buffer.BlockCopy(packetData, 0, dataToWrite, encapData.Length, packetData.Length);
 
-            await stream.WriteAsync(dataToWrite, 0, dataToWrite.Length);
+            try
+            {
+                await stream.WriteAsync(dataToWrite, 0, dataToWrite.Length);
 
-            var data = new byte[564];
-            var bytes = await stream.ReadAsync(data, 0, data.Length);
+                var data = new byte[564];
+                var bytes = await stream.ReadAsync(data, 0, data.Length);
 
-            //--------------------------BEGIN Error?
-            if (data[42] != 0)      //Exception codes see "Table B-1.1 CIP General Status Codes"
-                throw new CIPException(GeneralStatusCodes.GetStatusCode(data[42]));
-
-
-            //Close the Socket for Receive
-            udpClientReceiveClosed = true;
-            udpClientReceive.Close();
+                //--------------------------BEGIN Error?
+                if (data[42] != 0)      //Exception codes see "Table B-1.1 CIP General Status Codes"
+                    throw new CIPException(GeneralStatusCodes.GetStatusCode(data[42]));
+            }
+            finally
+            {
+                //Close the Socket for Receive
+                udpClientReceiveClosed = true;
+                udpClientReceive.Close();
+            }
         }
 
         private bool stopUdpThread;
@@ -882,11 +901,24 @@ namespace Sres.Net.EEIP
             if (udpClientReceiveClosed)
                 return;
 
-            u.BeginReceive(ReceiveCallbackClass1, (UdpState)ar.AsyncState);
-            var e = ((UdpState)ar.AsyncState).e;
+            byte[] receiveBytes;
+            try
+            {
+                u.BeginReceive(ReceiveCallbackClass1, (UdpState)ar.AsyncState);
 
-
-            var receiveBytes = u.EndReceive(ar, ref e);
+                var e = ((UdpState)ar.AsyncState).e;
+                receiveBytes = u.EndReceive(ar, ref e);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ObjectDisposedException || ex is SocketException)
+                {
+                    // TODO: Log it as a trace here
+                    return;
+                }
+                // Wasn't an exception we were looking for so rethrow it.
+                throw;
+            }
 
             // EndReceive worked and we have received data and remote endpoint
 
@@ -1414,6 +1446,8 @@ namespace Sres.Net.EEIP
 
         public void Dispose()
         {
+            this.stopUdpThread = true;
+            this.udpClientReceiveClosed = true;
             ((IDisposable)this.client)?.Dispose();
             this.stream?.Dispose();
             ((IDisposable)this.udpClientReceive)?.Dispose();
