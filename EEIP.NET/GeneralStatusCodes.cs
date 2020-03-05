@@ -1,12 +1,26 @@
-﻿namespace Sres.Net.EEIP
+﻿// ***********************************************************************
+// Assembly         : EEIP
+// Created          : 03-05-2020
+// Last Modified On : 03-05-2020
+// <copyright file="GeneralStatusCodes.cs" company="Stefan Rossmann, Nathan Brown and contributors">
+//     Copyright © 2020, All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+namespace Sres.Net.EEIP
 {
     /// <summary>
-    ///     Table B-1.1 CIP General Status Codes
+    /// Table B-1.1 CIP General Status Codes
     /// </summary>
     internal static class GeneralStatusCodes
     {
         #region Internal Methods
 
+        /// <summary>
+        /// Gets the status code.
+        /// </summary>
+        /// <param name="code">The code.</param>
+        /// <returns>System.String.</returns>
         internal static string GetStatusCode(byte code)
         {
             switch (code)

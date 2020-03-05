@@ -1,4 +1,13 @@
-﻿namespace Sres.Net.EEIP
+﻿// ***********************************************************************
+// Assembly         : EEIP
+// Created          : 03-05-2020
+// Last Modified On : 03-05-2020
+// <copyright file="EIPClient.cs" company="Stefan Rossmann, Nathan Brown and contributors">
+//     Copyright © 2020, All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+namespace Sres.Net.EEIP
 {
     using Sres.Net.EEIP.ObjectLibrary;
     using System;
@@ -13,31 +22,66 @@
     using System.Threading;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Class EEIPClient.
+    /// Implements the <see cref="System.IDisposable" />
+    /// </summary>
+    /// <seealso cref="System.IDisposable" />
     public class EEIPClient : IDisposable
     {
         #region Private Fields
 
         /// <summary>
-        /// Provides Access to the Class 1 Real-Time IO-Data Originator -> Target for Implicit Messaging
+        /// Provides Access to the Class 1 Real-Time IO-Data Originator -&gt; Target for Implicit Messaging
         /// </summary>
         private readonly byte[] _O_T_IOData = new byte[505];
 
+        /// <summary>
+        /// The o t io data lock
+        /// </summary>
         private readonly object _O_T_IOData_lock = new object();
 
         //Class 1 Real-Time IO-Data O->T
         /// <summary>
-        /// Provides Access to the Class 1 Real-Time IO-Data Target -> Originator for Implicit Messaging
+        /// Provides Access to the Class 1 Real-Time IO-Data Target -&gt; Originator for Implicit Messaging
         /// </summary>
         private readonly byte[] _T_O_IOData = new byte[505];
 
+        /// <summary>
+        /// The t o io data lock
+        /// </summary>
         private readonly object _T_O_IOData_lock = new object();
+        /// <summary>
+        /// The received cip identities
+        /// </summary>
         private readonly ConcurrentDictionary<Encapsulation.CIPIdentityItem, int> receivedCipIdentities = new ConcurrentDictionary<Encapsulation.CIPIdentityItem, int>();
+        /// <summary>
+        /// The assembly object
+        /// </summary>
         private AssemblyObject assemblyObject;
+        /// <summary>
+        /// The client
+        /// </summary>
         private TcpClient client;
+        /// <summary>
+        /// The connection identifier o t
+        /// </summary>
         private uint connectionID_O_T;
+        /// <summary>
+        /// The connection identifier t o
+        /// </summary>
         private uint connectionID_T_O;
+        /// <summary>
+        /// The connection serial number
+        /// </summary>
         private ushort connectionSerialNumber;
+        /// <summary>
+        /// The identity object
+        /// </summary>
         private IdentityObject identityObject;
+        /// <summary>
+        /// The message router object
+        /// </summary>
         private MessageRouterObject messageRouterObject;
 
         /// <summary>
@@ -45,11 +89,29 @@
         /// </summary>
         private uint multicastAddress;
 
+        /// <summary>
+        /// The o t detected length
+        /// </summary>
         private ushort o_t_detectedLength;
+        /// <summary>
+        /// The sequence
+        /// </summary>
         private int sequence;
+        /// <summary>
+        /// The session handle
+        /// </summary>
         private uint sessionHandle;
+        /// <summary>
+        /// The stop UDP thread
+        /// </summary>
         private bool stopUdpThread;
+        /// <summary>
+        /// The stream
+        /// </summary>
         private NetworkStream stream;
+        /// <summary>
+        /// The t o detected length
+        /// </summary>
         private ushort t_o_detectedLength;
 
         /// <summary>
@@ -57,16 +119,28 @@
         /// </summary>
         private IPAddress targetIpAddress = new IPAddress(new byte[] { 172, 0, 0, 1 });
 
+        /// <summary>
+        /// The TCP ip interface object
+        /// </summary>
         private TcpIpInterfaceObject tcpIpInterfaceObject;
 
+        /// <summary>
+        /// The UDP client receive
+        /// </summary>
         private UdpClient udpClientReceive;
 
+        /// <summary>
+        /// The UDP client receive closed
+        /// </summary>
         private bool udpClientReceiveClosed;
 
         #endregion Private Fields
 
         #region Public Events
 
+        /// <summary>
+        /// Occurs when [implicit message received].
+        /// </summary>
         public event EventHandler<ImplicitMessageReceivedArgs> ImplicitMessageReceived;
 
         #endregion Public Events
@@ -76,6 +150,7 @@
         /// <summary>
         /// Implementation of the Assembly Object (Class Code: 0x04)
         /// </summary>
+        /// <value>The assembly object.</value>
         public AssemblyObject AssemblyObject
         {
             get
@@ -89,16 +164,19 @@
         /// <summary>
         /// AssemblyObject for the Configuration Path in case of Implicit Messaging (Standard: 0x04)
         /// </summary>
+        /// <value>The assembly object class.</value>
         public byte AssemblyObjectClass { get; set; } = 0x04;
 
         /// <summary>
         /// ConfigurationAssemblyInstanceID is the InstanceID of the configuration Instance in the Assembly Object Class (Standard: 0x01)
         /// </summary>
+        /// <value>The configuration assembly instance identifier.</value>
         public byte ConfigurationAssemblyInstanceID { get; set; } = 0x01;
 
         /// <summary>
         /// Implementation of the identity Object (Class Code: 0x01) - Required Object according to CIP-Specification
         /// </summary>
+        /// <value>The identity object.</value>
         public IdentityObject IdentityObject
         {
             get
@@ -113,11 +191,13 @@
         /// Returns the Date and Time when the last Implicit Message has been received fŕom The Target Device
         /// Could be used to determine a Timeout
         /// </summary>
+        /// <value>The last received implicit message.</value>
         public DateTime LastReceivedImplicitMessage { get; set; }
 
         /// <summary>
         /// Implementation of the Message Router Object (Class Code: 0x02) - Required Object according to CIP-Specification
         /// </summary>
+        /// <value>The message router object.</value>
         public MessageRouterObject MessageRouterObject
         {
             get
@@ -129,18 +209,21 @@
         }
 
         /// <summary>
-        /// Connection Type Originator -> Target for Implicit Messaging (Default: ConnectionType.Point_to_Point)
+        /// Connection Type Originator -&gt; Target for Implicit Messaging (Default: ConnectionType.Point_to_Point)
         /// </summary>
+        /// <value>The type of the o t connection.</value>
         public ConnectionType O_T_ConnectionType { get; set; } = ConnectionType.Point_to_Point;
 
         /// <summary>
-        /// Class Assembly (Consuming IO-Path - Outputs) Originator -> Target for Implicit Messaging (Default: 0x64)
+        /// Class Assembly (Consuming IO-Path - Outputs) Originator -&gt; Target for Implicit Messaging (Default: 0x64)
         /// </summary>
+        /// <value>The o t instance identifier.</value>
         public byte O_T_InstanceID { get; set; } = 0x64;
 
         /// <summary>
-        /// Provides Access to the Class 1 Real-Time IO-Data Originator -> Target for Implicit Messaging
+        /// Provides Access to the Class 1 Real-Time IO-Data Originator -&gt; Target for Implicit Messaging
         /// </summary>
+        /// <value>The o t io data.</value>
         public byte[] O_T_IOData
         {
             get
@@ -164,65 +247,76 @@
         }
 
         /// <summary>
-        /// The maximum size in bytes (only pure data without sequence count and 32-Bit Real Time Header (if present)) from Originator -> Target for Implicit Messaging (Default: 505)
+        /// The maximum size in bytes (only pure data without sequence count and 32-Bit Real Time Header (if present)) from Originator -&gt; Target for Implicit Messaging (Default: 505)
         /// </summary>
+        /// <value>The length of the o t.</value>
         public ushort O_T_Length { get; set; } = 505;
 
         /// <summary>
-        /// "1" Indicates that multiple connections are allowed Originator -> Target for Implicit-Messaging (Default: TRUE)
+        /// "1" Indicates that multiple connections are allowed Originator -&gt; Target for Implicit-Messaging (Default: TRUE)
         /// </summary>
+        /// <value><c>true</c> if [o t owner redundant]; otherwise, <c>false</c>.</value>
         public bool O_T_OwnerRedundant { get; set; } = true;
 
         /// <summary>
-        /// Priority Originator -> Target for Implicit Messaging (Default: Priority.Scheduled)
+        /// Priority Originator -&gt; Target for Implicit Messaging (Default: Priority.Scheduled)
         /// Could be: Priority.Scheduled; Priority.High; Priority.Low; Priority.Urgent
         /// </summary>
+        /// <value>The o t priority.</value>
         public Priority O_T_Priority { get; set; } = Priority.Scheduled;
 
         //Class 1 Real-Time IO-Data T->O
         /// <summary>
-        /// Used Real-Time Format Originator -> Target for Implicit Messaging (Default: RealTimeFormat.Header32Bit)
+        /// Used Real-Time Format Originator -&gt; Target for Implicit Messaging (Default: RealTimeFormat.Header32Bit)
         /// Possible Values: RealTimeFormat.Header32Bit; RealTimeFormat.Heartbeat; RealTimeFormat.ZeroLength; RealTimeFormat.Modeless
         /// </summary>
+        /// <value>The o t real time format.</value>
         public RealTimeFormat O_T_RealTimeFormat { get; set; } = RealTimeFormat.Header32Bit;
 
         /// <summary>
         /// With a fixed size connection, the amount of data shall be the size of specified in the "Connection Size" Parameter.
         /// With a variable size, the amount of data could be up to the size specified in the "Connection Size" Parameter
-        /// Originator -> Target for Implicit Messaging (Default: True (Variable length))
+        /// Originator -&gt; Target for Implicit Messaging (Default: True (Variable length))
         /// </summary>
+        /// <value><c>true</c> if [o t variable length]; otherwise, <c>false</c>.</value>
         public bool O_T_VariableLength { get; set; } = true;
 
         /// <summary>
         /// UDP-Port of the Scanner - Standard is 0xAF12
         /// </summary>
+        /// <value>The originator UDP port.</value>
         public ushort OriginatorUDPPort { get; set; } = 0x08AE;
 
         /// <summary>
-        /// Requested Packet Rate (RPI) in Microseconds Originator -> Target for Implicit-Messaging (Default 0x7A120 -> 500ms)
+        /// Requested Packet Rate (RPI) in Microseconds Originator -&gt; Target for Implicit-Messaging (Default 0x7A120 -&gt; 500ms)
         /// </summary>
+        /// <value>The requested packet rate o t.</value>
         public uint RequestedPacketRate_O_T { get; set; } = 0x7A120;
 
         //500ms
         /// <summary>
-        /// Requested Packet Rate (RPI) in Microseconds Target -> Originator for Implicit-Messaging (Default 0x7A120 -> 500ms)
+        /// Requested Packet Rate (RPI) in Microseconds Target -&gt; Originator for Implicit-Messaging (Default 0x7A120 -&gt; 500ms)
         /// </summary>
+        /// <value>The requested packet rate t o.</value>
         public uint RequestedPacketRate_T_O { get; set; } = 0x7A120;
 
         /// <summary>
-        /// Connection Type Target -> Originator for Implicit Messaging (Default: ConnectionType.Multicast)
+        /// Connection Type Target -&gt; Originator for Implicit Messaging (Default: ConnectionType.Multicast)
         /// </summary>
+        /// <value>The type of the t o connection.</value>
         public ConnectionType T_O_ConnectionType { get; set; } = ConnectionType.Multicast;
 
         //Ausgänge
         /// <summary>
-        /// Class Assembly (Producing IO-Path - Inputs) Target -> Originator for Implicit Messaging (Default: 0x64)
+        /// Class Assembly (Producing IO-Path - Inputs) Target -&gt; Originator for Implicit Messaging (Default: 0x64)
         /// </summary>
+        /// <value>The t o instance identifier.</value>
         public byte T_O_InstanceID { get; set; } = 0x65;
 
         /// <summary>
-        /// Provides Access to the Class 1 Real-Time IO-Data Target -> Originator for Implicit Messaging
+        /// Provides Access to the Class 1 Real-Time IO-Data Target -&gt; Originator for Implicit Messaging
         /// </summary>
+        /// <value>The t o io data.</value>
         public byte[] T_O_IOData
         {
             get
@@ -236,29 +330,33 @@
 
         //For Forward Open - Max 505
         /// <summary>
-        /// The maximum size in bytes (only pure data without sequence count and 32-Bit Real Time Header (if present)) from Target -> Originator for Implicit Messaging (Default: 505)
+        /// The maximum size in bytes (only pure data without sequence count and 32-Bit Real Time Header (if present)) from Target -&gt; Originator for Implicit Messaging (Default: 505)
         /// </summary>
+        /// <value>The length of the t o.</value>
         public ushort T_O_Length { get; set; } = 505;
 
         //500ms
         //For Forward Open
         /// <summary>
-        /// "1" Indicates that multiple connections are allowed Target -> Originator for Implicit-Messaging (Default: TRUE)
+        /// "1" Indicates that multiple connections are allowed Target -&gt; Originator for Implicit-Messaging (Default: TRUE)
         /// </summary>
+        /// <value><c>true</c> if [t o owner redundant]; otherwise, <c>false</c>.</value>
         public bool T_O_OwnerRedundant { get; set; } = true;
 
         //For Forward Open - Max 505
         /// <summary>
-        /// Priority Target -> Originator for Implicit Messaging (Default: Priority.Scheduled)
+        /// Priority Target -&gt; Originator for Implicit Messaging (Default: Priority.Scheduled)
         /// Could be: Priority.Scheduled; Priority.High; Priority.Low; Priority.Urgent
         /// </summary>
+        /// <value>The t o priority.</value>
         public Priority T_O_Priority { get; set; } = Priority.Scheduled;
 
         //Eingänge
         /// <summary>
-        /// Used Real-Time Format Target -> Originator for Implicit Messaging (Default: RealTimeFormat.Modeless)
+        /// Used Real-Time Format Target -&gt; Originator for Implicit Messaging (Default: RealTimeFormat.Modeless)
         /// Possible Values: RealTimeFormat.Header32Bit; RealTimeFormat.Heartbeat; RealTimeFormat.ZeroLength; RealTimeFormat.Modeless
         /// </summary>
+        /// <value>The t o real time format.</value>
         public RealTimeFormat T_O_RealTimeFormat { get; set; } = RealTimeFormat.Modeless;
 
         //For Forward Open
@@ -266,19 +364,22 @@
         /// <summary>
         /// With a fixed size connection, the amount of data shall be the size of specified in the "Connection Size" Parameter.
         /// With a variable size, the amount of data could be up to the size specified in the "Connection Size" Parameter
-        /// Target -> Originator for Implicit Messaging (Default: True (Variable length))
+        /// Target -&gt; Originator for Implicit Messaging (Default: True (Variable length))
         /// </summary>
+        /// <value><c>true</c> if [t o variable length]; otherwise, <c>false</c>.</value>
         public bool T_O_VariableLength { get; set; } = true;
 
         /// <summary>
         /// UDP-Port of the IO-Adapter - Standard is 0xAF12
         /// Received on SocketInfoItem message
         /// </summary>
+        /// <value>The target UDP port.</value>
         public ushort TargetUDPPort { get; private set; } = 0x08AE;
 
         /// <summary>
         /// Implementation of the TCP/IP Object (Class Code: 0xF5) - Required Object according to CIP-Specification
         /// </summary>
+        /// <value>The TCP ip interface object.</value>
         public TcpIpInterfaceObject TcpIpInterfaceObject
         {
             get
@@ -308,6 +409,7 @@
         /// Converts a bytearray (received e.g. via getAttributeSingle) to uint
         /// </summary>
         /// <param name="byteArray">bytearray to convert</param>
+        /// <returns>System.UInt32.</returns>
         public static uint ToUint(byte[] byteArray)
         {
             var returnValue = ((uint)byteArray[3] << 24) | ((uint)byteArray[2] << 16) | ((uint)byteArray[1] << 8) | byteArray[0];
@@ -318,6 +420,7 @@
         /// Converts a bytearray (received e.g. via getAttributeSingle) to ushort
         /// </summary>
         /// <param name="byteArray">bytearray to convert</param>
+        /// <returns>System.UInt16.</returns>
         public static ushort ToUshort(byte[] byteArray)
         {
             var returnValue = (ushort)((byteArray[1] << 8) | byteArray[0]);
@@ -325,10 +428,12 @@
         }
 
         /// <summary>
-        /// Detects the Length of the data Originator -> Target.
+        /// Detects the Length of the data Originator -&gt; Target.
         /// The Method uses an Explicit Message to detect the length.
         /// The IP-Address, Port and the Instance ID has to be defined before
         /// </summary>
+        /// <returns>Task&lt;System.UInt16&gt;.</returns>
+        /// <exception cref="InvalidOperationException">Register session first.</exception>
         public async Task<ushort> Detect_O_T_Length()
         {
             if (o_t_detectedLength == 0)
@@ -343,10 +448,12 @@
         }
 
         /// <summary>
-        /// Detects the Length of the data Target -> Originator.
+        /// Detects the Length of the data Target -&gt; Originator.
         /// The Method uses an Explicit Message to detect the length.
         /// The IP-Address, Port and the Instance ID has to be defined before
         /// </summary>
+        /// <returns>Task&lt;System.UInt16&gt;.</returns>
+        /// <exception cref="InvalidOperationException">Register session first.</exception>
         public async Task<ushort> Detect_T_O_LengthAsync()
         {
             if (t_o_detectedLength == 0)
@@ -360,6 +467,9 @@
             return t_o_detectedLength;
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             this.stopUdpThread = true;
@@ -369,6 +479,10 @@
             ((IDisposable)this.udpClientReceive)?.Dispose();
         }
 
+        /// <summary>
+        /// forward close as an asynchronous operation.
+        /// </summary>
+        /// <exception cref="Sres.Net.EEIP.CIPException"></exception>
         public async Task ForwardCloseAsync()
         {
             //First stop the Thread which send data
@@ -493,11 +607,23 @@
             }
         }
 
+        /// <summary>
+        /// Forwards the open asynchronous.
+        /// </summary>
+        /// <returns>Task.</returns>
         public Task ForwardOpenAsync()
         {
             return ForwardOpenAsync(false);
         }
 
+        /// <summary>
+        /// forward open as an asynchronous operation.
+        /// </summary>
+        /// <param name="largeForwardOpen">if set to <c>true</c> [large forward open].</param>
+        /// <exception cref="InvalidOperationException">Register session first.</exception>
+        /// <exception cref="Sres.Net.EEIP.CIPException">Connection failure, General Status Code: " + data[42]</exception>
+        /// <exception cref="Sres.Net.EEIP.CIPException">Connection failure, General Status Code: " + data[42] + " Additional Status Code: " + ((data[45] << 8) | data[44]) + " " + ConnectionManagerObject.GetExtendedStatus((uint)((data[45] << 8) | data[44]))</exception>
+        /// <exception cref="Sres.Net.EEIP.CIPException"></exception>
         public async Task ForwardOpenAsync(bool largeForwardOpen)
         {
             if (sessionHandle == 0) //If a Session is not Registered, Try to Registers a Session with the predefined IP-Address and Port
@@ -779,6 +905,8 @@
         /// <param name="classID">Class id of requested Attributes</param>
         /// <param name="instanceID">Instance of Requested Attributes (0 for class Attributes)</param>
         /// <returns>Session Handle</returns>
+        /// <exception cref="InvalidOperationException">Register session first.</exception>
+        /// <exception cref="Sres.Net.EEIP.CIPException"></exception>
         public async Task<byte[]> GetAttributeAllAsync(int classID, int instanceID)
         {
             var requestedPath = GetEPath(classID, instanceID, 0);
@@ -852,11 +980,21 @@
         /// Implementation of Common Service "Get_Attribute_All" - Service Code: 0x01
         /// </summary>
         /// <param name="classID">Class id of requested Attributes</param>
+        /// <returns>Task&lt;System.Byte[]&gt;.</returns>
         public Task<byte[]> GetAttributeAllAsync(int classID)
         {
             return GetAttributeAllAsync(classID, 0);
         }
 
+        /// <summary>
+        /// get attribute single as an asynchronous operation.
+        /// </summary>
+        /// <param name="classID">The class identifier.</param>
+        /// <param name="instanceID">The instance identifier.</param>
+        /// <param name="attributeID">The attribute identifier.</param>
+        /// <returns>Task&lt;System.Byte[]&gt;.</returns>
+        /// <exception cref="InvalidOperationException">Register session first.</exception>
+        /// <exception cref="Sres.Net.EEIP.CIPException"></exception>
         public async Task<byte[]> GetAttributeSingleAsync(int classID, int instanceID, int attributeID)
         {
             var requestedPath = GetEPath(classID, instanceID, attributeID);
@@ -931,6 +1069,10 @@
             return returnData;
         }
 
+        /// <summary>
+        /// Larges the forward open asynchronous.
+        /// </summary>
+        /// <returns>Task.</returns>
         public Task LargeForwardOpenAsync()
         {
             return ForwardOpenAsync(true);
@@ -939,7 +1081,7 @@
         /// <summary>
         /// List and identify potential targets. This command shall be sent as broadcast massage using UDP.
         /// </summary>
-        /// <returns><see cref="Encapsulation.CIPIdentityItem"/> contains the received informations from all devices </returns>
+        /// <returns><see cref="Encapsulation.CIPIdentityItem" /> contains the received informations from all devices</returns>
         public async Task<List<Encapsulation.CIPIdentityItem>> ListIdentityAsync()
         {
             foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
@@ -1029,6 +1171,7 @@
         /// </summary>
         /// <param name="address">IP-Address of the target device</param>
         /// <returns>Session Handle</returns>
+        /// <exception cref="ArgumentException">address must be absolute - address</exception>
         public Task<uint> RegisterSessionAsync(Uri address)
         {
             if (!address.IsAbsoluteUri)
@@ -1060,6 +1203,16 @@
             return RegisterSessionAsync(ipAddress, port);
         }
 
+        /// <summary>
+        /// set attribute single as an asynchronous operation.
+        /// </summary>
+        /// <param name="classID">The class identifier.</param>
+        /// <param name="instanceID">The instance identifier.</param>
+        /// <param name="attributeID">The attribute identifier.</param>
+        /// <param name="value">The value.</param>
+        /// <returns>Task&lt;System.Byte[]&gt;.</returns>
+        /// <exception cref="InvalidOperationException">Register session first.</exception>
+        /// <exception cref="Sres.Net.EEIP.CIPException"></exception>
         public async Task<byte[]> SetAttributeSingleAsync(int classID, int instanceID, int attributeID, byte[] value)
         {
             var requestedPath = GetEPath(classID, instanceID, attributeID);
@@ -1173,6 +1326,10 @@
 
         #region Protected Methods
 
+        /// <summary>
+        /// Called when [implicit message received].
+        /// </summary>
+        /// <param name="e">The e.</param>
         protected virtual void OnImplicitMessageReceived(ImplicitMessageReceivedArgs e)
         {
             ImplicitMessageReceived?.Invoke(this, e);
@@ -1259,6 +1416,10 @@
             return returnValue;
         }
 
+        /// <summary>
+        /// Gets the multicast address.
+        /// </summary>
+        /// <param name="ipAddress">The ip address.</param>
         /// <returns>Value of IP the multicast address. The value is in big-endian format</returns>
         private static uint GetMulticastAddress(IPAddress ipAddress)
         {
@@ -1292,6 +1453,11 @@
             return BitConverter.IsLittleEndian ? SwapEndianness(mcastAddr) : mcastAddr;
         }
 
+        /// <summary>
+        /// Swaps the endianness.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>System.UInt32.</returns>
         private static uint SwapEndianness(uint value)
         {
             var b1 = value & 0xff;
@@ -1302,6 +1468,10 @@
             return b1 << 24 | b2 << 16 | b3 << 8 | b4;
         }
 
+        /// <summary>
+        /// Receives the callback class1.
+        /// </summary>
+        /// <param name="ar">The ar.</param>
         private void ReceiveCallbackClass1(IAsyncResult ar)
         {
             var u = ((UdpState)ar.AsyncState).u;
@@ -1356,6 +1526,10 @@
         }
 
         //For Forward Open
+        /// <summary>
+        /// Receives the identity callback.
+        /// </summary>
+        /// <param name="ar">The ar.</param>
         private void ReceiveIdentityCallback(IAsyncResult ar)
         {
             var udpState = (UdpState)ar.AsyncState;
@@ -1389,6 +1563,9 @@
             }
         }
 
+        /// <summary>
+        /// Sends the UDP thread.
+        /// </summary>
         private void SendUdpThread()
         {
             var udpClientsend = new UdpClient();
@@ -1481,11 +1658,20 @@
 
         #region Public Classes
 
+        /// <summary>
+        /// Class UdpState.
+        /// </summary>
         public class UdpState
         {
             #region Public Fields
 
+            /// <summary>
+            /// The e
+            /// </summary>
             public IPEndPoint e;
+            /// <summary>
+            /// The u
+            /// </summary>
             public UdpClient u;
 
             #endregion Public Fields

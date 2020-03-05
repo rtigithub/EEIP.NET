@@ -1,4 +1,13 @@
-﻿namespace Sres.Net.EEIP.ObjectLibrary
+﻿// ***********************************************************************
+// Assembly         : EEIP
+// Created          : 03-05-2020
+// Last Modified On : 03-05-2020
+// <copyright file="TcpIpInterfaceObject.cs" company="Stefan Rossmann, Nathan Brown and contributors">
+//     Copyright © 2020, All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+namespace Sres.Net.EEIP.ObjectLibrary
 {
     using System.Text;
     using System.Threading.Tasks;
@@ -10,10 +19,25 @@
     {
         #region Public Fields
 
+        /// <summary>
+        /// The boot p client
+        /// </summary>
         public bool BootPClient;
+        /// <summary>
+        /// The configuration settable
+        /// </summary>
         public bool ConfigurationSettable;
+        /// <summary>
+        /// The DHCP DNS update
+        /// </summary>
         public bool DHCP_DNSUpdate;
+        /// <summary>
+        /// The DHCP client
+        /// </summary>
         public bool DHCPClient;
+        /// <summary>
+        /// The DNS client
+        /// </summary>
         public bool DNSClient;
 
         #endregion Public Fields
@@ -26,9 +50,21 @@
     {
         #region Public Fields
 
+        /// <summary>
+        /// The enable boot p
+        /// </summary>
         public bool EnableBootP;
+        /// <summary>
+        /// The enable DHCP
+        /// </summary>
         public bool EnableDHCP;
+        /// <summary>
+        /// The enable DNS
+        /// </summary>
         public bool EnableDNS;
+        /// <summary>
+        /// The use previously stored
+        /// </summary>
         public bool UsePreviouslyStored;
 
         #endregion Public Fields
@@ -41,9 +77,21 @@
     {
         #region Public Fields
 
+        /// <summary>
+        /// The mcast pending
+        /// </summary>
         public bool McastPending;
+        /// <summary>
+        /// The not configured
+        /// </summary>
         public bool NotConfigured;
+        /// <summary>
+        /// The valid configuration
+        /// </summary>
         public bool ValidConfiguration;
+        /// <summary>
+        /// The valid manual configuration
+        /// </summary>
         public bool ValidManualConfiguration;
 
         #endregion Public Fields
@@ -56,11 +104,29 @@
     {
         #region Public Fields
 
+        /// <summary>
+        /// The domain name
+        /// </summary>
         public string DomainName;
+        /// <summary>
+        /// The gateway address
+        /// </summary>
         public uint GatewayAddress;
+        /// <summary>
+        /// The ip address
+        /// </summary>
         public uint IPAddress;
+        /// <summary>
+        /// The name server
+        /// </summary>
         public uint NameServer;
+        /// <summary>
+        /// The name server2
+        /// </summary>
         public uint NameServer2;
+        /// <summary>
+        /// The network mask
+        /// </summary>
         public uint NetworkMask;
 
         #endregion Public Fields
@@ -73,16 +139,28 @@
     {
         #region Public Fields
 
+        /// <summary>
+        /// The path
+        /// </summary>
         public byte[] Path;
+        /// <summary>
+        /// The path size
+        /// </summary>
         public ushort PathSize;
 
         #endregion Public Fields
     }
 
+    /// <summary>
+    /// Class TcpIpInterfaceObject.
+    /// </summary>
     public class TcpIpInterfaceObject
     {
         #region Public Fields
 
+        /// <summary>
+        /// The eeip client
+        /// </summary>
         public EEIPClient eeipClient;
 
         #endregion Public Fields
@@ -90,8 +168,9 @@
         #region Public Constructors
 
         /// <summary>
-        /// Constructor. </summary>
-        /// <param name="eeipClient"> EEIPClient Object</param>
+        /// Constructor.
+        /// </summary>
+        /// <param name="eeipClient">EEIPClient Object</param>
         public TcpIpInterfaceObject(EEIPClient eeipClient)
         {
             this.eeipClient = eeipClient;
@@ -104,6 +183,7 @@
         /// <summary>
         /// gets the Configuration capability / Read "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 2
         /// </summary>
+        /// <returns>Task&lt;InterfaceCapabilityFlags&gt;.</returns>
         public async Task<InterfaceCapabilityFlags> GetConfigurationCapabilityAsync()
         {
             byte[] byteArray = await eeipClient.GetAttributeSingleAsync(0xF5, 1, 2);
@@ -124,6 +204,7 @@
         /// <summary>
         /// gets the Path to the Physical Link object / Read "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 4
         /// </summary>
+        /// <returns>Task&lt;PhysicalLink&gt;.</returns>
         public async Task<PhysicalLink> GetPhysicalLinkObjectAsync()
         {
             byte[] byteArray = await eeipClient.GetAttributeSingleAsync(0xF5, 1, 4);
@@ -137,6 +218,7 @@
         /// <summary>
         /// gets the Status / Read "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 1
         /// </summary>
+        /// <returns>Task&lt;InterfaceStatus&gt;.</returns>
         public async Task<InterfaceStatus> GetStatusAsync()
         {
             byte[] byteArray = await eeipClient.GetAttributeSingleAsync(0xF5, 1, 1);
@@ -155,6 +237,8 @@
         /// <summary>
         /// sets the TCP/IP Network interface Configuration / Write "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 5
         /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>Task.</returns>
         public Task InterfaceConfigurationAsync(NetworkInterfaceConfiguration value)
         {
             byte[] valueToWrite = new byte[68];
@@ -189,6 +273,8 @@
         /// <summary>
         /// sets the Configuration control attribute / Write "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 3
         /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>Task.</returns>
         public Task SetConfigurationControlAsync(InterfaceControlFlags value)
         {
             byte[] valueToWrite = new byte[4];

@@ -1,9 +1,17 @@
-﻿namespace Sres.Net.EEIP.ObjectLibrary
-{    /// <summary>
-     /// Connection Manager Object - Class Code: 06 Hex
-     /// </summary>
-     /// <remarks>
-     /// </remarks>
+﻿// ***********************************************************************
+// Assembly         : EEIP
+// Created          : 03-05-2020
+// Last Modified On : 03-05-2020
+// <copyright file="ConnectionManagerObject.cs" company="Stefan Rossmann, Nathan Brown and contributors">
+//     Copyright © 2020, All rights reserved.
+// </copyright>
+// <summary></summary>
+// ***********************************************************************
+namespace Sres.Net.EEIP.ObjectLibrary
+{
+    /// <summary>
+    /// Connection Manager Object - Class Code: 06 Hex
+    /// </summary>
     public class ConnectionManagerObject
     {
         #region Public Methods
@@ -12,6 +20,7 @@
         /// Returns the Explanation of a given statuscode (Table 3-5-29) Page 3-75 Vol 1
         /// </summary>
         /// <param name="statusCode">Extended Status Code</param>
+        /// <returns>System.String.</returns>
         public static string GetExtendedStatus(uint statusCode)
         {
             switch (statusCode)
