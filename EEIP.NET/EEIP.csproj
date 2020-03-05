@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
-    <Version>2.0.0.1-alpha1</Version>
+    <Version>2.0.0.1-alpha.1</Version>
     <Copyright>Copyright © 2020, All rights reserved.</Copyright>
     <Company></Company>
     <Product>EEIP.NET</Product>
@@ -13,6 +13,8 @@
     <PackageProjectUrl>https://github.com/rtigithub/EEIP.NET</PackageProjectUrl>
     <PackageTags>ethernet-ip cip eeip</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>StrongNameKeyFile.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
 </Project>
