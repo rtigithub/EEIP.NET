@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Sres.Net.EEIP.ObjectLibrary
 {
@@ -23,11 +19,9 @@ namespace Sres.Net.EEIP.ObjectLibrary
         /// </summary>
         /// <param name="instanceNo"> Instance number to be returned</param>
         /// <returns>bytes of the Instance</returns>
-        public byte[] getInstance(int instanceNo)
+        public Task<byte[]> GetInstanceAsync(int instanceNo)
         {
-            
-                byte[] byteArray = eeipClient.GetAttributeSingle(4, instanceNo, 3);
-                return byteArray;
+            return this.eeipClient.GetAttributeSingleAsync(4, instanceNo, 3);
         }
 
         /// <summary>
@@ -35,11 +29,9 @@ namespace Sres.Net.EEIP.ObjectLibrary
         /// </summary>
         /// <param name="instanceNo"> Instance number to be returned</param>
         /// <returns>bytes of the Instance</returns>
-        public void setInstance(int instanceNo, byte[] value)
+        public Task SetInstanceAsync(int instanceNo, byte[] value)
         {
-
-            eeipClient.SetAttributeSingle(4, instanceNo, 3, value);
+            return eeipClient.SetAttributeSingleAsync(4, instanceNo, 3, value);
         }
-
     }
 }
