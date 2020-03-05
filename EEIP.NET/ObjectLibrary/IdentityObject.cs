@@ -1,8 +1,8 @@
-﻿using System.Text;
-using System.Threading.Tasks;
-
-namespace Sres.Net.EEIP.ObjectLibrary
+﻿namespace Sres.Net.EEIP.ObjectLibrary
 {
+    using System.Text;
+    using System.Threading.Tasks;
+
     /// <summary>
     /// Identity Object - Class Code: 01 Hex
     /// </summary>

@@ -1,8 +1,4 @@
-﻿using Sres.Net.EEIP;
-using System;
-using System.Threading.Tasks;
-
-//The Following Hardware Configuration is used in this example
+﻿//The Following Hardware Configuration is used in this example
 // Turck FEN20-4DIP-4DXP
 //Unisversal Digital Channels are used as Digital Outputs
 // Manual: http://pdb2.turck.de/repo/media/_en/Anlagen/Datei_EDB/edb_6931090_gbr_en.pdf
@@ -10,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace TurckFEN20
 {
+    using Sres.Net.EEIP;
+    using System;
+    using System.Threading.Tasks;
+
     internal class Program
     {
         #region Private Methods

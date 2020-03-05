@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace Sres.Net.EEIP
+﻿namespace Sres.Net.EEIP
 {
+    using System;
+
     public class CIPException : Exception
     {
         #region Public Constructors

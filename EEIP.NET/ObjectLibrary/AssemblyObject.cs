@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-
-namespace Sres.Net.EEIP.ObjectLibrary
+﻿namespace Sres.Net.EEIP.ObjectLibrary
 {
+    using System.Threading.Tasks;
+
     public class AssemblyObject
     {
         #region Public Fields

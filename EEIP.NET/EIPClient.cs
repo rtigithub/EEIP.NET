@@ -1,18 +1,18 @@
-﻿using Sres.Net.EEIP.ObjectLibrary;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Sres.Net.EEIP
+﻿namespace Sres.Net.EEIP
 {
+    using Sres.Net.EEIP.ObjectLibrary;
+    using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net;
+    using System.Net.NetworkInformation;
+    using System.Net.Sockets;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+
     public class EEIPClient : IDisposable
     {
         #region Private Fields

@@ -1,9 +1,9 @@
-﻿using Sres.Net.EEIP;
-using System;
-using System.Threading.Tasks;
-
-namespace Explicit_Message_Example2
+﻿namespace Explicit_Message_Example2
 {
+    using Sres.Net.EEIP;
+    using System;
+    using System.Threading.Tasks;
+
     internal class Program
     {
         #region Private Methods

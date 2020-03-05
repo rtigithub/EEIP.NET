@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
-
-namespace DescoverDevices
+﻿namespace DescoverDevices
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Net;
+    using System.Threading.Tasks;
+
     internal class Program
     {
         #region Private Methods

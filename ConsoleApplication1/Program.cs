@@ -1,9 +1,9 @@
-﻿using Sres.Net.EEIP;
-using System;
-using System.Threading.Tasks;
-
-namespace ConsoleApplication1
+﻿namespace ConsoleApplication1
 {
+    using Sres.Net.EEIP;
+    using System;
+    using System.Threading.Tasks;
+
     internal class Program
     {
         #region Private Methods

@@ -1,7 +1,7 @@
-﻿using System;
-
-namespace Sres.Net.EEIP
+﻿namespace Sres.Net.EEIP
 {
+    using System;
+
     public class ImplicitMessageReceivedArgs : EventArgs
     {
         #region Public Constructors

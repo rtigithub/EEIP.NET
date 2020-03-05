@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sres.Net.EEIP
+﻿namespace Sres.Net.EEIP
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text;
+
     public class Encapsulation
     {
         #region Public Fields

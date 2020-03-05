@@ -1,8 +1,8 @@
-﻿using System.Text;
-using System.Threading.Tasks;
-
-namespace Sres.Net.EEIP.ObjectLibrary
+﻿namespace Sres.Net.EEIP.ObjectLibrary
 {
+    using System.Text;
+    using System.Threading.Tasks;
+
     /// <summary>
     /// Chapter 5-3.2.2.2 Volume 2
     /// </summary>

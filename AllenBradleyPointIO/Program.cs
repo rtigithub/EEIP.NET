@@ -1,8 +1,4 @@
-﻿using Sres.Net.EEIP;
-using System;
-using System.Threading.Tasks;
-
-//The Following Hardware Configuration is used in this example
+﻿//The Following Hardware Configuration is used in this example
 // Allen-Bradley 1734-AENT Ethernet/IP Coupler
 // Allen-Bradley 1734-IB4 4-Channel Digital Input Module
 // Allen-Bradley 1734-IB4 4-Channel Digital Input Module
@@ -16,6 +12,10 @@ using System.Threading.Tasks;
 
 namespace AllenBradleyPointIO
 {
+    using Sres.Net.EEIP;
+    using System;
+    using System.Threading.Tasks;
+
     internal class Program
     {
         #region Private Methods
