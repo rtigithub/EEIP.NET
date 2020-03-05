@@ -1,20 +1,22 @@
-﻿using System;
+﻿using Sres.Net.EEIP;
+using System;
 using System.Threading.Tasks;
-using Sres.Net.EEIP;
 
 //The Following Hardware Configuration is used in this example
 // Turck FEN20-4DIP-4DXP
 //Unisversal Digital Channels are used as Digital Outputs
 // Manual: http://pdb2.turck.de/repo/media/_en/Anlagen/Datei_EDB/edb_6931090_gbr_en.pdf
-//IP-Address: 192.168.1.254 
+//IP-Address: 192.168.1.254
 
 namespace TurckFEN20
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+        #region Private Methods
 
-        static async Task MainAsync(string[] args)
+        private static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+
+        private static async Task MainAsync(string[] args)
         {
             EEIPClient eeipClient = new EEIPClient();
             //Ip-Address of the Ethernet-IP Device (In this case Allen-Bradley 1734-AENT Point I/O)
@@ -46,7 +48,6 @@ namespace TurckFEN20
 
             while (true)
             {
-
                 //Read the Inputs Transfered form Target -> Originator
                 Console.WriteLine("State of Input byte: " + eeipClient.T_O_IOData[2]);
 
@@ -59,8 +60,8 @@ namespace TurckFEN20
             //Close the Session
             await eeipClient.ForwardCloseAsync();
             await eeipClient.UnRegisterSessionAsync();
-
         }
+
+        #endregion Private Methods
     }
 }
-

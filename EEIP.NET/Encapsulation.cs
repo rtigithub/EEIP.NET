@@ -6,27 +6,20 @@ namespace Sres.Net.EEIP
 {
     public class Encapsulation
     {
-        public CommandsEnum Command { get; set; }
-        public ushort Length { get; set; }
-        public uint SessionHandle { get; set; }
-        public StatusEnum Status { get; set; }
-        private readonly byte[] senderContext = new byte[8];
-        private readonly uint options = 0;
+        #region Public Fields
+
         public List<byte> CommandSpecificData = new List<byte>();
 
-        /// <summary>
-        ///     Table 2-3.3 Error Codes
-        /// </summary>
-        public enum StatusEnum : uint
-        {
-            Success = 0x0000,
-            InvalidCommand = 0x0001,
-            InsufficientMemory = 0x0002,
-            IncorrectData = 0x0003,
-            InvalidSessionHandle = 0x0064,
-            InvalidLength = 0x0065,
-            UnsupportedEncapsulationProtocol = 0x0069
-        }
+        #endregion Public Fields
+
+        #region Private Fields
+
+        private readonly uint options = 0;
+        private readonly byte[] senderContext = new byte[8];
+
+        #endregion Private Fields
+
+        #region Public Enums
 
         /// <summary>
         ///     Table 2-3.2 Encapsulation Commands
@@ -44,6 +37,33 @@ namespace Sres.Net.EEIP
             IndicateStatus = 0x0072,
             Cancel = 0x0073
         }
+
+        /// <summary>
+        ///     Table 2-3.3 Error Codes
+        /// </summary>
+        public enum StatusEnum : uint
+        {
+            Success = 0x0000,
+            InvalidCommand = 0x0001,
+            InsufficientMemory = 0x0002,
+            IncorrectData = 0x0003,
+            InvalidSessionHandle = 0x0064,
+            InvalidLength = 0x0065,
+            UnsupportedEncapsulationProtocol = 0x0069
+        }
+
+        #endregion Public Enums
+
+        #region Public Properties
+
+        public CommandsEnum Command { get; set; }
+        public ushort Length { get; set; }
+        public uint SessionHandle { get; set; }
+        public StatusEnum Status { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
 
         public byte[] SerializeToBytes()
         {
@@ -77,30 +97,16 @@ namespace Sres.Net.EEIP
             return returnValue;
         }
 
+        #endregion Public Methods
+
+        #region Public Classes
 
         /// <summary>
         ///     Table 2-4.4 CIP Identity Item
         /// </summary>
         public class CIPIdentityItem
         {
-            public ushort ItemTypeCode { get; }                               //Code indicating item type of CIP Identity (0x0C)
-            public ushort ItemLength { get; } //Number of bytes in item which follow (length varies depending on Product Name string)
-            public ushort EncapsulationProtocolVersion { get; } //Encapsulation Protocol Version supported (also returned with Register Sesstion reply).
-            public SocketAddress SocketAddress { get; } = new SocketAddress(); //Socket Address (see section 2-6.3.2)
-            public ushort VendorID1 { get; } //Device manufacturers Vendor ID
-            public ushort DeviceType1 { get; } //Device Type of product
-            public ushort ProductCode1 { get; } //Product Code assigned with respect to device type
-            public byte[] Revision1 { get; } = new byte[2];                    //Device revision
-            public ushort Status1 { get; } //Current status of device
-            public uint SerialNumber1 { get; } //Serial number of device
-            public byte ProductNameLength { get; }
-            public string ProductName1 { get; } //Human readable description of device
-            public byte State1 { get; } //Current state of device
-
-            public static CIPIdentityItem Deserialize(int startingByte, byte[] receivedData)
-            {
-                return new CIPIdentityItem(startingByte, receivedData);
-            }
+            #region Private Constructors
 
             private CIPIdentityItem(int startingByte, byte[] receivedData)
             {
@@ -118,7 +124,7 @@ namespace Sres.Net.EEIP
                                                | (receivedData[25 + startingByte] << 8));
                 ProductCode1 = Convert.ToUInt16(receivedData[26 + startingByte]
                                                 | (receivedData[27 + startingByte] << 8));
-                Revision1 = new[] {receivedData[28 + startingByte], receivedData[29 + startingByte]};
+                Revision1 = new[] { receivedData[28 + startingByte], receivedData[29 + startingByte] };
                 Status1 = Convert.ToUInt16(receivedData[30 + startingByte]
                                            | (receivedData[31 + startingByte] << 8));
                 SerialNumber1 = (uint)(receivedData[32 + startingByte]
@@ -130,21 +136,51 @@ namespace Sres.Net.EEIP
                 State1 = receivedData[receivedData.Length - 1];
             }
 
-            protected bool Equals(CIPIdentityItem other)
+            #endregion Private Constructors
+
+            #region Public Properties
+
+            public ushort DeviceType1 { get; }
+            public ushort EncapsulationProtocolVersion { get; }
+            public ushort ItemLength { get; }
+            public ushort ItemTypeCode { get; }                               //Code indicating item type of CIP Identity (0x0C)
+
+                                                                              //Device Type of product
+            public ushort ProductCode1 { get; }
+
+            public string ProductName1 { get; }
+
+            public byte ProductNameLength { get; }
+
+            //Product Code assigned with respect to device type
+            public byte[] Revision1 { get; } = new byte[2];
+
+            public uint SerialNumber1 { get; }
+
+            //Number of bytes in item which follow (length varies depending on Product Name string)
+            //Encapsulation Protocol Version supported (also returned with Register Sesstion reply).
+            public SocketAddress SocketAddress { get; } = new SocketAddress(); //Socket Address (see section 2-6.3.2)
+
+                                                                               //Serial number of device
+                                                                               //Human readable description of device
+            public byte State1 { get; }
+
+            //Device revision
+            public ushort Status1 { get; }
+
+            public ushort VendorID1 { get; }
+
+            #endregion Public Properties
+
+            //Device manufacturers Vendor ID
+            //Current status of device
+            //Current state of device
+
+            #region Public Methods
+
+            public static CIPIdentityItem Deserialize(int startingByte, byte[] receivedData)
             {
-                return ItemTypeCode == other.ItemTypeCode
-                       && ItemLength == other.ItemLength
-                       && EncapsulationProtocolVersion == other.EncapsulationProtocolVersion
-                       && Equals(SocketAddress, other.SocketAddress)
-                       && VendorID1 == other.VendorID1
-                       && DeviceType1 == other.DeviceType1
-                       && ProductCode1 == other.ProductCode1
-                       && Equals(Revision1, other.Revision1)
-                       && Status1 == other.Status1
-                       && SerialNumber1 == other.SerialNumber1
-                       && ProductNameLength == other.ProductNameLength
-                       && ProductName1 == other.ProductName1
-                       && State1 == other.State1;
+                return new CIPIdentityItem(startingByte, receivedData);
             }
 
             public override bool Equals(object obj)
@@ -178,89 +214,51 @@ namespace Sres.Net.EEIP
                     return hashCode;
                 }
             }
-        }
 
-        /// <summary>
-        ///     Socket Address (see section 2-6.3.2)
-        /// </summary>
-        public class SocketAddress
-        {
-            public SocketAddress()
+            #endregion Public Methods
+
+            #region Protected Methods
+
+            protected bool Equals(CIPIdentityItem other)
             {
+                return ItemTypeCode == other.ItemTypeCode
+                       && ItemLength == other.ItemLength
+                       && EncapsulationProtocolVersion == other.EncapsulationProtocolVersion
+                       && Equals(SocketAddress, other.SocketAddress)
+                       && VendorID1 == other.VendorID1
+                       && DeviceType1 == other.DeviceType1
+                       && ProductCode1 == other.ProductCode1
+                       && Equals(Revision1, other.Revision1)
+                       && Status1 == other.Status1
+                       && SerialNumber1 == other.SerialNumber1
+                       && ProductNameLength == other.ProductNameLength
+                       && ProductName1 == other.ProductName1
+                       && State1 == other.State1;
             }
 
-            /// <param name="sinAddress">Value of IP address. The value is in big-endian format</param>
-            public SocketAddress(ushort sinFamily, ushort sinPort, uint sinAddress)
-            {
-                SIN_family = sinFamily;
-                SIN_port = sinPort;
-                SIN_Address = sinAddress;
-            }
-
-            public ushort SIN_family { get; }
-            public ushort SIN_port { get; }
-            
-            /// <summary>
-            /// Value of IP address. The value is in big-endian format
-            /// </summary>
-            public uint SIN_Address { get; }
-
-            public byte[] SIN_Zero { get; } = new byte[8];
-
-            protected bool Equals(SocketAddress other)
-            {
-                return SIN_family == other.SIN_family
-                       && SIN_port == other.SIN_port
-                       && SIN_Address == other.SIN_Address;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                    return false;
-                if (ReferenceEquals(this, obj))
-                    return true;
-                if (obj.GetType() != this.GetType())
-                    return false;
-                return Equals((SocketAddress)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    var hashCode = SIN_family.GetHashCode();
-                    hashCode = (hashCode * 397) ^ SIN_port.GetHashCode();
-                    hashCode = (hashCode * 397) ^ (int)SIN_Address;
-                    return hashCode;
-                }
-            }
-            public static SocketAddress FromBytes(byte[] data, int startIndex)
-            {
-                var family = (ushort)(data[startIndex + 1]
-                                      | (data[startIndex + 0] << 8));
-                var port = (ushort)(data[startIndex + 3]
-                                    | (data[startIndex + 2] << 8));
-                var address = (uint)(data[startIndex + 4]
-                                     | (data[startIndex + 5] << 8)
-                                     | (data[startIndex + 6] << 16)
-                                     | (data[startIndex + 7] << 24));
-
-                return new SocketAddress(family, port, address);
-            }
+            #endregion Protected Methods
         }
 
         public class CommonPacketFormat
         {
-            public ushort ItemCount { get; set; } = 2;
+            #region Public Properties
+
             public ushort AddressItem { get; set; } = 0x0000;
             public ushort AddressLength { get; set; } = 0;
-            public ushort DataItem { get; set; } = 0xB2; //0xB2 = Unconnected Data Item
-            public ushort DataLength { get; set; } = 8;
             public List<byte> Data { get; } = new List<byte>();
+            public ushort DataItem { get; set; } = 0xB2;
+
+            //0xB2 = Unconnected Data Item
+            public ushort DataLength { get; set; } = 8;
+
+            public ushort ItemCount { get; set; } = 2;
             public ushort SockaddrInfoItem_O_T { get; set; } = 0x8001; //8000 for O->T and 8001 for T->O - Volume 2 Table 2-6.9
             public ushort SockaddrInfoLength { get; set; } = 16;
             public SocketAddress SocketaddrInfo_O_T { get; set; } = null;
+
+            #endregion Public Properties
+
+            #region Public Methods
 
             public byte[] SerializeToBytes()
             {
@@ -307,6 +305,96 @@ namespace Sres.Net.EEIP
 
                 return returnValue;
             }
+
+            #endregion Public Methods
         }
+
+        /// <summary>
+        ///     Socket Address (see section 2-6.3.2)
+        /// </summary>
+        public class SocketAddress
+        {
+            #region Public Constructors
+
+            public SocketAddress()
+            {
+            }
+
+            /// <param name="sinAddress">Value of IP address. The value is in big-endian format</param>
+            public SocketAddress(ushort sinFamily, ushort sinPort, uint sinAddress)
+            {
+                SIN_family = sinFamily;
+                SIN_port = sinPort;
+                SIN_Address = sinAddress;
+            }
+
+            #endregion Public Constructors
+
+            #region Public Properties
+
+            /// <summary>
+            /// Value of IP address. The value is in big-endian format
+            /// </summary>
+            public uint SIN_Address { get; }
+
+            public ushort SIN_family { get; }
+            public ushort SIN_port { get; }
+            public byte[] SIN_Zero { get; } = new byte[8];
+
+            #endregion Public Properties
+
+            #region Public Methods
+
+            public static SocketAddress FromBytes(byte[] data, int startIndex)
+            {
+                var family = (ushort)(data[startIndex + 1]
+                                      | (data[startIndex + 0] << 8));
+                var port = (ushort)(data[startIndex + 3]
+                                    | (data[startIndex + 2] << 8));
+                var address = (uint)(data[startIndex + 4]
+                                     | (data[startIndex + 5] << 8)
+                                     | (data[startIndex + 6] << 16)
+                                     | (data[startIndex + 7] << 24));
+
+                return new SocketAddress(family, port, address);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj))
+                    return false;
+                if (ReferenceEquals(this, obj))
+                    return true;
+                if (obj.GetType() != this.GetType())
+                    return false;
+                return Equals((SocketAddress)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    var hashCode = SIN_family.GetHashCode();
+                    hashCode = (hashCode * 397) ^ SIN_port.GetHashCode();
+                    hashCode = (hashCode * 397) ^ (int)SIN_Address;
+                    return hashCode;
+                }
+            }
+
+            #endregion Public Methods
+
+            #region Protected Methods
+
+            protected bool Equals(SocketAddress other)
+            {
+                return SIN_family == other.SIN_family
+                       && SIN_port == other.SIN_port
+                       && SIN_Address == other.SIN_Address;
+            }
+
+            #endregion Protected Methods
+        }
+
+        #endregion Public Classes
     }
 }

@@ -1,21 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Sres.Net.EEIP;
+using System;
 using System.Threading.Tasks;
-using Sres.Net.EEIP;
 
 namespace Explicit_Message_Example2
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+        #region Private Methods
 
-        static async Task MainAsync(string[] args)
+        private static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+
+        private static async Task MainAsync(string[] args)
         {
             EEIPClient eeipClient = new EEIPClient();
 
-            //Register Session (Wago-Device 750-352 IP-Address: 192.168.178.66) 
+            //Register Session (Wago-Device 750-352 IP-Address: 192.168.178.66)
             //we use the Standard Port for Ethernet/IP TCP-connections 0xAF12
             await eeipClient.RegisterSessionAsync(new Uri("tcp://192.168.1.3"));
 
@@ -29,10 +28,11 @@ namespace Explicit_Message_Example2
             Console.WriteLine("State of Digital Input 3: " + (EEIPClient.ToBool(digitalInputs[0], 2)));
             Console.WriteLine("State of Digital Input 4: " + (EEIPClient.ToBool(digitalInputs[0], 3)));
 
-
             //When done, we unregister the session
             await eeipClient.UnRegisterSessionAsync();
             Console.ReadKey();
         }
+
+        #endregion Private Methods
     }
 }

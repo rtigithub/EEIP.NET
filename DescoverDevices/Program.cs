@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 
 namespace DescoverDevices
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+        #region Private Methods
 
-        static async Task MainAsync(string[] args)
+        private static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+
+        private static async Task MainAsync(string[] args)
         {
             Sres.Net.EEIP.EEIPClient eipClient = new Sres.Net.EEIP.EEIPClient();
             List<Sres.Net.EEIP.Encapsulation.CIPIdentityItem> cipIdentityItem = await eipClient.ListIdentityAsync();
@@ -24,10 +26,10 @@ namespace DescoverDevices
                 Console.WriteLine("Product-code: " + cipIdentityItem[i].ProductCode1);
                 Console.WriteLine("Type-Code: " + cipIdentityItem[i].ItemTypeCode);
                 Console.WriteLine("Serial Number: " + cipIdentityItem[i].SerialNumber1);
-
-
             }
             Console.ReadKey();
         }
+
+        #endregion Private Methods
     }
 }

@@ -4,6 +4,8 @@ namespace Sres.Net.EEIP
 {
     public class CIPException : Exception
     {
+        #region Public Constructors
+
         public CIPException()
         {
         }
@@ -17,5 +19,7 @@ namespace Sres.Net.EEIP
             : base(message, inner)
         {
         }
+
+        #endregion Public Constructors
     }
 }

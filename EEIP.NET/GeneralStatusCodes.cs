@@ -5,6 +5,8 @@
     /// </summary>
     internal static class GeneralStatusCodes
     {
+        #region Internal Methods
+
         internal static string GetStatusCode(byte code)
         {
             switch (code)
@@ -56,5 +58,7 @@
                 default: return "unknown";
             }
         }
+
+        #endregion Internal Methods
     }
 }

@@ -1,19 +1,17 @@
-﻿using System;
+﻿using Sres.Net.EEIP;
+using System;
 using System.Threading.Tasks;
-using Sres.Net.EEIP;
 
 namespace ConsoleApplication1
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+        #region Private Methods
 
-        static async Task MainAsync(string[] args)
+        private static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+
+        private static async Task MainAsync(string[] args)
         {
-
-
-
-
             EEIPClient eeipClient = new EEIPClient();
             await eeipClient.RegisterSessionAsync(new Uri("tcp://192.168.0.123"));
             byte[] response = await eeipClient.GetAttributeSingleAsync(0x66, 1, 0x325);
@@ -23,8 +21,8 @@ namespace ConsoleApplication1
             Console.WriteLine();
             Console.Write("Enter intensity for Sensor 1 [1..100]");
             int value = int.Parse(Console.ReadLine());
-            Console.WriteLine("Set Light intensity Sensor 1 to "+value+"%");
-            await eeipClient.SetAttributeSingleAsync(0x66, 1, 0x389,new byte [] {(byte)value,0 });
+            Console.WriteLine("Set Light intensity Sensor 1 to " + value + "%");
+            await eeipClient.SetAttributeSingleAsync(0x66, 1, 0x389, new byte[] { (byte)value, 0 });
             Console.Write("Enter intensity for Sensor 2 [1..100]");
             value = int.Parse(Console.ReadLine());
             Console.WriteLine("Set Light intensity Sensor 2 to " + value + "%");
@@ -37,8 +35,8 @@ namespace ConsoleApplication1
             Console.WriteLine("Current light Intensity Sensor 2 in %: " + (response[1] * 255 + response[0]).ToString());
             await eeipClient.UnRegisterSessionAsync();
             Console.ReadKey();
-     
-       
         }
+
+        #endregion Private Methods
     }
 }

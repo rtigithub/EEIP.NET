@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Sres.Net.EEIP;
+using System;
 using System.Threading.Tasks;
-using Sres.Net.EEIP;
 
 //The Following Hardware Configuration is used in this example
 // Allen-Bradley 1734-AENT Ethernet/IP Coupler
@@ -16,11 +16,13 @@ using Sres.Net.EEIP;
 
 namespace AllenBradleyPointIO
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+        #region Private Methods
 
-        static async Task MainAsync(string[] args)
+        private static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+
+        private static async Task MainAsync(string[] args)
         {
             EEIPClient eeipClient = new EEIPClient();
             //Ip-Address of the Ethernet-IP Device (In this case Allen-Bradley 1734-AENT Point I/O)
@@ -50,9 +52,8 @@ namespace AllenBradleyPointIO
             //Forward open initiates the Implicit Messaging
             await eeipClient.ForwardOpenAsync();
 
-            while(true)
+            while (true)
             {
-
                 //Read the Inputs Transfered form Target -> Originator
                 Console.WriteLine("State of first Input byte: " + eeipClient.T_O_IOData[8]);
                 Console.WriteLine("State of second Input byte: " + eeipClient.T_O_IOData[9]);
@@ -69,7 +70,8 @@ namespace AllenBradleyPointIO
             //Close the Session
             await eeipClient.ForwardCloseAsync();
             await eeipClient.UnRegisterSessionAsync();
-
         }
+
+        #endregion Private Methods
     }
 }

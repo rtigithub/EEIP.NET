@@ -3,9 +3,91 @@ using System.Threading.Tasks;
 
 namespace Sres.Net.EEIP.ObjectLibrary
 {
+    /// <summary>
+    /// Chapter 5-3.2.2.2 Volume 2
+    /// </summary>
+    public struct InterfaceCapabilityFlags
+    {
+        #region Public Fields
+
+        public bool BootPClient;
+        public bool ConfigurationSettable;
+        public bool DHCP_DNSUpdate;
+        public bool DHCPClient;
+        public bool DNSClient;
+
+        #endregion Public Fields
+    }
+
+    /// <summary>
+    /// Chapter 5-3.2.2.3 Volume 2
+    /// </summary>
+    public struct InterfaceControlFlags
+    {
+        #region Public Fields
+
+        public bool EnableBootP;
+        public bool EnableDHCP;
+        public bool EnableDNS;
+        public bool UsePreviouslyStored;
+
+        #endregion Public Fields
+    }
+
+    /// <summary>
+    /// Chapter 5-3.2.2.1 Volume 2
+    /// </summary>
+    public struct InterfaceStatus
+    {
+        #region Public Fields
+
+        public bool McastPending;
+        public bool NotConfigured;
+        public bool ValidConfiguration;
+        public bool ValidManualConfiguration;
+
+        #endregion Public Fields
+    }
+
+    /// <summary>
+    /// Chapter 5-3.2.2.5 Volume 2
+    /// </summary>
+    public struct NetworkInterfaceConfiguration
+    {
+        #region Public Fields
+
+        public string DomainName;
+        public uint GatewayAddress;
+        public uint IPAddress;
+        public uint NameServer;
+        public uint NameServer2;
+        public uint NetworkMask;
+
+        #endregion Public Fields
+    }
+
+    /// <summary>
+    /// Page 5.5 Volume 2
+    /// </summary>
+    public struct PhysicalLink
+    {
+        #region Public Fields
+
+        public byte[] Path;
+        public ushort PathSize;
+
+        #endregion Public Fields
+    }
+
     public class TcpIpInterfaceObject
     {
+        #region Public Fields
+
         public EEIPClient eeipClient;
+
+        #endregion Public Fields
+
+        #region Public Constructors
 
         /// <summary>
         /// Constructor. </summary>
@@ -15,23 +97,9 @@ namespace Sres.Net.EEIP.ObjectLibrary
             this.eeipClient = eeipClient;
         }
 
-        /// <summary>
-        /// gets the Status / Read "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 1
-        /// </summary>
-        public async Task<InterfaceStatus> GetStatusAsync()
-        {
-            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(0xF5, 1, 1);
-            InterfaceStatus status = new InterfaceStatus();
-            if ((byteArray[0] & 0x0F) == 0)
-                status.NotConfigured = true;
-            if ((byteArray[0] & 0x0F) == 1)
-                status.ValidConfiguration = true;
-            if ((byteArray[0] & 0x0F) == 2)
-                status.ValidManualConfiguration = true;
-            if ((byteArray[0] & 0x10) != 0)
-                status.McastPending = true;
-            return status;
-        }
+        #endregion Public Constructors
+
+        #region Public Methods
 
         /// <summary>
         /// gets the Configuration capability / Read "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 2
@@ -67,18 +135,21 @@ namespace Sres.Net.EEIP.ObjectLibrary
         }
 
         /// <summary>
-        /// sets the Configuration control attribute / Write "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 3
+        /// gets the Status / Read "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 1
         /// </summary>
-        public Task SetConfigurationControlAsync(InterfaceControlFlags value)
+        public async Task<InterfaceStatus> GetStatusAsync()
         {
-            byte[] valueToWrite = new byte[4];
-            if (value.EnableBootP)
-                valueToWrite[0] = 1;
-            if (value.EnableDHCP)
-                valueToWrite[0] = 2;
-            if (value.EnableDNS)
-                valueToWrite[0] = (byte)(valueToWrite[0] | 0x10);
-            return eeipClient.SetAttributeSingleAsync(0xF5, 1, 3, valueToWrite);
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(0xF5, 1, 1);
+            InterfaceStatus status = new InterfaceStatus();
+            if ((byteArray[0] & 0x0F) == 0)
+                status.NotConfigured = true;
+            if ((byteArray[0] & 0x0F) == 1)
+                status.ValidConfiguration = true;
+            if ((byteArray[0] & 0x0F) == 2)
+                status.ValidManualConfiguration = true;
+            if ((byteArray[0] & 0x10) != 0)
+                status.McastPending = true;
+            return status;
         }
 
         /// <summary>
@@ -115,60 +186,21 @@ namespace Sres.Net.EEIP.ObjectLibrary
             return eeipClient.SetAttributeSingleAsync(0xF5, 1, 5, valueToWrite);
         }
 
-    }
-
-    /// <summary>
-    /// Chapter 5-3.2.2.1 Volume 2
-    /// </summary>
-    public struct InterfaceStatus
+        /// <summary>
+        /// sets the Configuration control attribute / Write "TCP/IP Interface Object" Class Code 0xF5 - Attribute ID 3
+        /// </summary>
+        public Task SetConfigurationControlAsync(InterfaceControlFlags value)
         {
-            public bool NotConfigured;
-            public bool ValidConfiguration;
-            public bool ValidManualConfiguration;
-            public bool McastPending;  
+            byte[] valueToWrite = new byte[4];
+            if (value.EnableBootP)
+                valueToWrite[0] = 1;
+            if (value.EnableDHCP)
+                valueToWrite[0] = 2;
+            if (value.EnableDNS)
+                valueToWrite[0] = (byte)(valueToWrite[0] | 0x10);
+            return eeipClient.SetAttributeSingleAsync(0xF5, 1, 3, valueToWrite);
         }
 
-    /// <summary>
-    /// Chapter 5-3.2.2.2 Volume 2
-    /// </summary>
-    public struct InterfaceCapabilityFlags
-    {
-        public bool BootPClient;
-        public bool DNSClient;
-        public bool DHCPClient;
-        public bool DHCP_DNSUpdate;
-        public bool ConfigurationSettable;
-    }
-    /// <summary>
-    /// Chapter 5-3.2.2.3 Volume 2
-    /// </summary>
-    public struct InterfaceControlFlags
-    {
-        public bool UsePreviouslyStored;
-        public bool EnableBootP;
-        public bool EnableDHCP;
-        public bool EnableDNS;
-    }
-
-    /// <summary>
-    /// Page 5.5 Volume 2
-    /// </summary>
-    public struct PhysicalLink
-    {
-        public ushort PathSize;
-        public byte[] Path;
-    }
-
-    /// <summary>
-    /// Chapter 5-3.2.2.5 Volume 2
-    /// </summary>
-    public struct NetworkInterfaceConfiguration
-    {
-        public uint IPAddress;
-        public uint NetworkMask;
-        public uint GatewayAddress;
-        public uint NameServer;
-        public uint NameServer2;
-        public string DomainName;
+        #endregion Public Methods
     }
 }

@@ -4,7 +4,13 @@ namespace Sres.Net.EEIP.ObjectLibrary
 {
     public class AssemblyObject
     {
+        #region Public Fields
+
         public EEIPClient eeipClient;
+
+        #endregion Public Fields
+
+        #region Public Constructors
 
         /// <summary>
         /// Constructor. </summary>
@@ -13,6 +19,10 @@ namespace Sres.Net.EEIP.ObjectLibrary
         {
             this.eeipClient = eeipClient;
         }
+
+        #endregion Public Constructors
+
+        #region Public Methods
 
         /// <summary>
         /// Reads the Instance of the Assembly Object (Instance 101 returns the bytes of the class ID 101)
@@ -33,5 +43,7 @@ namespace Sres.Net.EEIP.ObjectLibrary
         {
             return eeipClient.SetAttributeSingleAsync(4, instanceNo, 3, value);
         }
+
+        #endregion Public Methods
     }
 }

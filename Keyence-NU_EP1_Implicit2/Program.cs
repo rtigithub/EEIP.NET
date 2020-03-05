@@ -1,22 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Sres.Net.EEIP;
+using System;
 using System.Threading.Tasks;
-using Sres.Net.EEIP;
 
-
-//This example demonstrates the usage of Implicit Messaging 
+//This example demonstrates the usage of Implicit Messaging
 //whith an Keyence NU-EP1 Network Unit. This is an Input Only connection.
 //The 128 received bytes returns the state of the Sensors (Page 3-9 of Keyence Manual contains the assignment).
 //Keyence Users Manual Page 3-6 No. 2
 namespace Keyence_NU_RP1_Implicit
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+        #region Private Methods
 
-        static async Task MainAsync(string[] args)
+        private static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+
+        private static async Task MainAsync(string[] args)
         {
             EEIPClient eeipClient = new EEIPClient();
             //Ip-Address of the Ethernet-IP Device (In this case Keyence-NU-EP1)
@@ -33,7 +31,6 @@ namespace Keyence_NU_RP1_Implicit
             eeipClient.O_T_ConnectionType = Sres.Net.EEIP.ConnectionType.Point_to_Point;
             eeipClient.RequestedPacketRate_O_T = 500000;    //RPI in  500ms is the Standard value
 
-
             //Parameters from Target -> Originator
             eeipClient.T_O_InstanceID = 0x64;
             eeipClient.T_O_Length = 128;
@@ -49,12 +46,9 @@ namespace Keyence_NU_RP1_Implicit
 
             while (true)
             {
-
                 //Read the Inputs Transfered form Target -> Originator
                 Console.WriteLine("Sensor Value 1: " + (eeipClient.T_O_IOData[30] | eeipClient.T_O_IOData[31] << 8));
                 Console.WriteLine("Sensor Value 2: " + (eeipClient.T_O_IOData[32] | eeipClient.T_O_IOData[33] << 8));
-
-
 
                 System.Threading.Thread.Sleep(500);
             }
@@ -63,6 +57,7 @@ namespace Keyence_NU_RP1_Implicit
             await eeipClient.ForwardCloseAsync();
             await eeipClient.UnRegisterSessionAsync();
         }
+
+        #endregion Private Methods
     }
 }
-

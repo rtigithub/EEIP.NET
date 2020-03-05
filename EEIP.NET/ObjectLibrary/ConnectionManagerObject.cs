@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Sres.Net.EEIP.ObjectLibrary
+﻿namespace Sres.Net.EEIP.ObjectLibrary
 {    /// <summary>
      /// Connection Manager Object - Class Code: 06 Hex
      /// </summary>
@@ -12,13 +6,15 @@ namespace Sres.Net.EEIP.ObjectLibrary
      /// </remarks>
     public class ConnectionManagerObject
     {
+        #region Public Methods
+
         /// <summary>
         /// Returns the Explanation of a given statuscode (Table 3-5-29) Page 3-75 Vol 1
         /// </summary>
-        /// <param name="statusCode">Extended Status Code</param> 
+        /// <param name="statusCode">Extended Status Code</param>
         public static string GetExtendedStatus(uint statusCode)
         {
-            switch(statusCode)
+            switch (statusCode)
             {
                 case 0x0100: return "Connection in use or duplicate forward open";
                 case 0x0103: return "Transport class and trigger combination not supported";
@@ -68,5 +64,7 @@ namespace Sres.Net.EEIP.ObjectLibrary
                 default: return "unknown";
             }
         }
+
+        #endregion Public Methods
     }
 }
