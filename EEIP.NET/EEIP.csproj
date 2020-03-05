@@ -9,12 +9,25 @@
     <Description>Ethernet/IP</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>EEIP.NET</PackageId>
-    <Authors>Stefan Rossmann,  Nathan Brown and others</Authors>
+    <Authors>Stefan Rossmann, Nathan Brown and contributors</Authors>
     <PackageProjectUrl>https://github.com/rtigithub/EEIP.NET</PackageProjectUrl>
     <PackageTags>ethernet-ip cip eeip</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageLicenseExpression></PackageLicenseExpression>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>StrongNameKeyFile.pfx</AssemblyOriginatorKeyFile>
+    <DelaySign>false</DelaySign>
+    <PackageLicenseFile>license.md</PackageLicenseFile>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <DefineConstants>DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="license.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 
 </Project>
