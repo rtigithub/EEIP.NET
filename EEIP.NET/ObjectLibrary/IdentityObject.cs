@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,58 +26,45 @@ namespace Sres.Net.EEIP.ObjectLibrary
         /// <summary>
         /// gets the Vendor ID / Read "Identity Object" Class Code 0x01 - Attribute ID 1
         /// </summary>
-        public UInt16 VendorID
+        public async Task<ushort> GetVendorIDAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 1);
-                UInt16 returnValue = (UInt16)(byteArray[1] << 8 | byteArray[0]);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 1);
+            ushort returnValue = (ushort)(byteArray[1] << 8 | byteArray[0]);
+            return returnValue;
         }
 
         /// <summary>
         /// gets the Device Type / Read "Identity Object" Class Code 0x01 - Attribute ID 2
         /// </summary>
-        public UInt16 DeviceType
+        public async Task<ushort> GetDeviceTypeAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 2);
-                UInt16 returnValue = (UInt16)(byteArray[1] << 8 | byteArray[0]);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 2);
+            ushort returnValue = (ushort)(byteArray[1] << 8 | byteArray[0]);
+            return returnValue;
         }
 
 
         /// <summary>
         /// gets the Product code / Read "Identity Object" Class Code 0x01 - Attribute ID 3
         /// </summary>
-        public UInt16 ProductCode
+        public async Task<ushort> GetProductCodeAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 3);
-                UInt16 returnValue = (UInt16)(byteArray[1] << 8 | byteArray[0]);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 3);
+            ushort returnValue = (ushort)(byteArray[1] << 8 | byteArray[0]);
+            return returnValue;
         }
 
         /// <summary>
         /// gets the Revision / Read "Identity Object" Class Code 0x01 - Attribute ID 4
         /// </summary>
         /// <returns>Revision</returns>
-        public Revison Revision
+        public async Task<Revison> GetRevisionAsync()
         {
-            get
-            {
-
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 4);
-                Revison returnValue = new Revison();
-                returnValue.MajorRevision = (ushort)(byteArray[0]);
-                returnValue.MinorRevision = (ushort)(byteArray[1]);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 4);
+            Revison returnValue = new Revison();
+            returnValue.MajorRevision = (ushort)(byteArray[0]);
+            returnValue.MinorRevision = (ushort)(byteArray[1]);
+            return returnValue;
         }
 
         public struct Revison
@@ -91,40 +76,31 @@ namespace Sres.Net.EEIP.ObjectLibrary
         /// <summary>
         /// gets the Status / Read "Identity Object" Class Code 0x01 - Attribute ID 5
         /// </summary>
-        public UInt16 Status
+        public async Task<ushort> GetStatusAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 5);
-                UInt16 returnValue = (UInt16)(byteArray[1] << 8 | byteArray[0]);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 5);
+            ushort returnValue = (ushort)(byteArray[1] << 8 | byteArray[0]);
+            return returnValue;
         }
 
         /// <summary>
         /// gets the Serial number / Read "Identity Object" Class Code 0x01 - Attribute ID 6
         /// </summary>
-        public UInt32 SerialNumber
+        public async Task<uint> GetSerialNumberAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 6);
-                UInt32 returnValue = ((UInt32)byteArray[3] << 24 | (UInt32)byteArray[2] << 16 | (UInt32)byteArray[1] << 8 | (UInt32)byteArray[0]);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 6);
+            uint returnValue = ((uint)byteArray[3] << 24 | (uint)byteArray[2] << 16 | (uint)byteArray[1] << 8 | (uint)byteArray[0]);
+            return returnValue;
         }
 
         /// <summary>
         /// gets the Product Name / Read "Identity Object" Class Code 0x01 - Attribute ID 7
         /// </summary>
-        public string ProductName
+        public async Task<string> GetProductNameAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 7);
-                String returnValue = Encoding.UTF8.GetString(byteArray);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 7);
+            string returnValue = Encoding.UTF8.GetString(byteArray);
+            return returnValue;
         }
 
         public enum StateEnum
@@ -141,117 +117,99 @@ namespace Sres.Net.EEIP.ObjectLibrary
         /// <summary>
         /// gets the State / Read "Identity Object" Class Code 0x01 - Attribute ID 8
         /// </summary>
-        public StateEnum State
+        public async Task<StateEnum> GetStateAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 8);
-                StateEnum returnValue = (StateEnum) byteArray[0];
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 8);
+            StateEnum returnValue = (StateEnum)byteArray[0];
+            return returnValue;
         }
 
         /// <summary>
         /// gets the State / Read "Identity Object" Class Code 0x01 - Attribute ID 9
         /// </summary>
-        public UInt16 ConfigurationConsistencyValue
+        public async Task<ushort> GetConfigurationConsistencyValueAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 9);
-                UInt16 returnValue = (UInt16)(byteArray[1] << 8 | byteArray[0]);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 9);
+            ushort returnValue = (ushort)(byteArray[1] << 8 | byteArray[0]);
+            return returnValue;
         }
 
         /// <summary>
         /// gets the Heartbeat intervall / Read "Identity Object" Class Code 0x01 - Attribute ID 10
         /// </summary>
-        public byte HeartbeatInterval
+        public async Task<byte> GetHeartbeatIntervalAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 10);
-                byte returnValue = (byte)byteArray[0];
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 10);
+            byte returnValue = (byte)byteArray[0];
+            return returnValue;
         }
 
         /// <summary>
         /// gets the Supported Language List / Read "Identity Object" Class Code 0x01 - Attribute ID 12
         /// </summary>
-        public string[] SupportedLanguageList
+        public async Task<string[]> GetSupportedLanguageListAsync()
         {
-            get
+            byte[] byteArray = await eeipClient.GetAttributeSingleAsync(1, 1, 12);
+            string[] returnValue = new string[byteArray.Length / 3];
+            for (int i = 0; i < returnValue.Length; i++)
             {
-                byte[] byteArray = eeipClient.GetAttributeSingle(1, 1, 12);
-                string[] returnValue = new string[byteArray.Length / 3];
-                for (int i = 0; i < returnValue.Length; i++)
-                {
-                    byte[] byteArray2 = new byte[3];
-                    System.Buffer.BlockCopy(byteArray, i*3, byteArray2, 0, 3);
-                    returnValue[i] = Encoding.UTF8.GetString(byteArray2);
-                }
-                return returnValue;
+                byte[] byteArray2 = new byte[3];
+                System.Buffer.BlockCopy(byteArray, i * 3, byteArray2, 0, 3);
+                returnValue[i] = Encoding.UTF8.GetString(byteArray2);
             }
+            return returnValue;
         }
 
         /// <summary>
         /// gets all class attributes
         /// </summary>
-        public ClassAttributesStruct ClassAttributes
+        public async Task<ClassAttributesStruct> GetClassAttributesAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeAll(1, 0);
-                ClassAttributesStruct returnValue;
-                returnValue.Revision = (UInt16)(byteArray[1] << 8 | byteArray[0]);
-                returnValue.MaxInstance = (UInt16)(byteArray[3] << 8 | byteArray[2]);
-                returnValue.MaxIDNumberOfClassAttributes = (UInt16)(byteArray[5] << 8 | byteArray[4]);
-                returnValue.MaxIDNumberOfInstanceAttributes = (UInt16)(byteArray[7] << 8 | byteArray[6]);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeAllAsync(1, 0);
+            ClassAttributesStruct returnValue;
+            returnValue.Revision = (ushort)(byteArray[1] << 8 | byteArray[0]);
+            returnValue.MaxInstance = (ushort)(byteArray[3] << 8 | byteArray[2]);
+            returnValue.MaxIDNumberOfClassAttributes = (ushort)(byteArray[5] << 8 | byteArray[4]);
+            returnValue.MaxIDNumberOfInstanceAttributes = (ushort)(byteArray[7] << 8 | byteArray[6]);
+            return returnValue;
         }
 
         /// <summary>
         /// gets all instance attributes
         /// </summary>
-        public InstanceAttributesStruct InstanceAttributes
+        public async Task<InstanceAttributesStruct> GetInstanceAttributesAsync()
         {
-            get
-            {
-                byte[] byteArray = eeipClient.GetAttributeAll(1, 1);
-                InstanceAttributesStruct returnValue;
-                returnValue.VendorID = (UInt16)(byteArray[1] << 8 | byteArray[0]);
-                returnValue.DeviceType = (UInt16)(byteArray[3] << 8 | byteArray[2]);
-                returnValue.ProductCode = (UInt16)(byteArray[5] << 8 | byteArray[4]);
-                returnValue.Revision.MajorRevision = byteArray[6];
-                returnValue.Revision.MinorRevision = byteArray[7];
-                returnValue.Status = (UInt16)(byteArray[9] << 8 | byteArray[8]);
-                returnValue.SerialNumber = ((UInt32)byteArray[13] << 24 | (UInt32)byteArray[12] << 16 | (UInt32)byteArray[11] << 8 | (UInt32)byteArray[10]);
-                byte[] productName = new byte[byteArray[14]];
-                System.Buffer.BlockCopy(byteArray, 15, productName, 0, productName.Length);
-                returnValue.ProductName = Encoding.UTF8.GetString(productName);
-                return returnValue;
-            }
+            byte[] byteArray = await eeipClient.GetAttributeAllAsync(1, 1);
+            InstanceAttributesStruct returnValue;
+            returnValue.VendorID = (ushort)(byteArray[1] << 8 | byteArray[0]);
+            returnValue.DeviceType = (ushort)(byteArray[3] << 8 | byteArray[2]);
+            returnValue.ProductCode = (ushort)(byteArray[5] << 8 | byteArray[4]);
+            returnValue.Revision.MajorRevision = byteArray[6];
+            returnValue.Revision.MinorRevision = byteArray[7];
+            returnValue.Status = (ushort)(byteArray[9] << 8 | byteArray[8]);
+            returnValue.SerialNumber = ((uint)byteArray[13] << 24 | (uint)byteArray[12] << 16 | (uint)byteArray[11] << 8 | (uint)byteArray[10]);
+            byte[] productName = new byte[byteArray[14]];
+            System.Buffer.BlockCopy(byteArray, 15, productName, 0, productName.Length);
+            returnValue.ProductName = Encoding.UTF8.GetString(productName);
+            return returnValue;
         }
 
 
         public struct ClassAttributesStruct
         {
-            public UInt16 Revision;
-            public UInt16 MaxInstance;
-            public UInt16 MaxIDNumberOfClassAttributes;
-            public UInt16 MaxIDNumberOfInstanceAttributes;
+            public ushort Revision;
+            public ushort MaxInstance;
+            public ushort MaxIDNumberOfClassAttributes;
+            public ushort MaxIDNumberOfInstanceAttributes;
         }
 
         public struct InstanceAttributesStruct
         {
-            public UInt16 VendorID;
-            public UInt16 DeviceType;
-            public UInt16 ProductCode;
+            public ushort VendorID;
+            public ushort DeviceType;
+            public ushort ProductCode;
             public Revison Revision;
-            public UInt16 Status;
+            public ushort Status;
             public uint SerialNumber;
             public string ProductName;
         }

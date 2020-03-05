@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Sres.Net.EEIP;
 
 //The Following Hardware Configuration is used in this example
@@ -11,13 +12,14 @@ namespace TurckFEN20
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+
+        static async Task MainAsync(string[] args)
         {
             EEIPClient eeipClient = new EEIPClient();
             //Ip-Address of the Ethernet-IP Device (In this case Allen-Bradley 1734-AENT Point I/O)
-            eeipClient.IPAddress = "192.168.1.254";
             //A Session has to be registered before any communication can be established
-            eeipClient.RegisterSession();
+            await eeipClient.RegisterSessionAsync(new Uri("tcp://192.168.1.254"));
 
             //Parameters from Originator -> Target
             eeipClient.O_T_InstanceID = 0x68;              //Instance ID of the Output Assembly
@@ -40,7 +42,7 @@ namespace TurckFEN20
             eeipClient.RequestedPacketRate_T_O = 500000;    //RPI in  500ms is the Standard value
 
             //Forward open initiates the Implicit Messaging
-            eeipClient.ForwardOpen();
+            await eeipClient.ForwardOpenAsync();
 
             while (true)
             {
@@ -55,8 +57,8 @@ namespace TurckFEN20
             }
 
             //Close the Session
-            eeipClient.ForwardClose();
-            eeipClient.UnRegisterSession();
+            await eeipClient.ForwardCloseAsync();
+            await eeipClient.UnRegisterSessionAsync();
 
         }
     }
